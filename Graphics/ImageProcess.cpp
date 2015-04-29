@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "ImageProcess.h"
+#include "Convolve.h"
+#include "Misc.h"
 #include "Bitmap.h"
 
 namespace e
@@ -14,21 +16,21 @@ namespace e
 
 	}
 
-	Bitmap* ImageProcess::GrayBitmap(const Bitmap* bitmap)
+	Bitmap* ImageProcess::GrayBitmap(const Bitmap* src)
 	{
-		assert(bitmap != 0 && bitmap->biBitCount >= 24);
+		assert(src != 0 && src->biBitCount >= 24);
 
-		Bitmap* result = new Bitmap(bitmap->Width(), bitmap->Height(), 8);
-		assert(result != 0);
+		Bitmap* dst = new Bitmap(src->Width(), src->Height(), 8);
+		assert(dst != 0);
 
-		if (result != 0)
+		if (dst != 0)
 		{
-			for (int y = 0; y < bitmap->Height(); y++)
+			for (int y = 0; y < src->Height(); y++)
 			{
-				uint8* p0 = bitmap->Get(0, y);
-				uint8* p1 = result->Get(0, y);
+				uint8* p0 = src->Get(0, y);
+				uint8* p1 = dst->Get(0, y);
 
-				for (int x = 0; x < bitmap->Width(); x++)
+				for (int x = 0; x < src->Width(); x++)
 				{
 					uint8 b = *(p0 + 0);
 					uint8 g = *(p0 + 1);
@@ -38,18 +40,51 @@ namespace e
 
 					*p1 = min(value, 255);
 
-					p0 += bitmap->PixelBytes();
-					p1 += result->PixelBytes();
+					p0 += src->PixelBytes();
+					p1 += dst->PixelBytes();
 				}
 			}
 		}
 
-		return result;
+		return dst;
 	}
 
-	Bitmap* ImageProcess::SmoothBitmap(const Bitmap* bitmap, float sigma)
+	Bitmap* ImageProcess::SmoothBitmap(const Bitmap* src, float sigma)
 	{
-		return 0;
+		assert(src && src->biBitCount == 24);
+		//根据sigma计算出积卷内核
+		const float width = 4.0f;
+		sigma = max(sigma, 0.01f);
+		int size = (int)ceil(sigma * width) + 1;
+
+		float* mask = new float[size];
+		assert(mask != 0);
+		
+		float sum = 0.0f;
+		for (int i = 0; i < size; i++)
+		{
+			mask[i] = exp(-0.5*square(i / sigma));
+			sum += fabs(mask[i]);
+		}
+		sum -= fabs(mask[0]);
+		//normalize
+		sum = sum * 2 + fabs(mask[0]);
+		for (int i = 0; i < size; i++)
+		{
+			mask[i] /= sum;
+		}
+
+		Bitmap* tmp = new Bitmap(src->Height(), src->Width(), src->biBitCount);
+		Bitmap* dst = new Bitmap(src->Width(), src->Height(), src->biBitCount);
+		assert(tmp && dst);
+
+		ConvolveEven(tmp, src, mask, size);
+		ConvolveEven(dst, tmp, mask, size);
+
+		delete[] mask;
+		delete tmp;
+
+		return dst;
 	}
 
 	Bitmap* ImageProcess::DrawRect(Bitmap* bitmap
@@ -79,7 +114,7 @@ namespace e
 		uint8 g = GC(color);
 		uint8 r = RC(color);
 
-		//往内部画
+		//往内部收缩
 		for (int i = 0; i < lineWidth; i++)
 		{
 			uint8* p0 = bitmap->Get(x0, min(y0 + i, y1));
@@ -123,7 +158,7 @@ namespace e
 	Bitmap* ImageProcess::DrawRect(Bitmap* bitmap, const Rect* rect, int lineWidth, RGBA color)
 	{
 		assert(bitmap && rect);
-		return DrawRect(bitmap, rect->L(), rect->T(), rect->R(), rect->B(), lineWidth, color);
+		return DrawRect(bitmap, rect->x0, rect->y0, rect->x1, rect->y1, lineWidth, color);
 	}
 }
 

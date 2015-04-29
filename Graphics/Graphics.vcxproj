@@ -109,9 +109,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AutoPtr.h" />
     <ClInclude Include="Bitmap.h" />
     <ClInclude Include="BitmapGlyph.h" />
     <ClInclude Include="ClassView.h" />
+    <ClInclude Include="Convolve.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="Graphics.h" />
@@ -119,6 +121,8 @@
     <ClInclude Include="GraphicsView.h" />
     <ClInclude Include="ImageProcess.h" />
     <ClInclude Include="MainFrame.h" />
+    <ClInclude Include="Misc.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="Resource.h" />
@@ -136,6 +140,7 @@
     <ClCompile Include="GraphicsView.cpp" />
     <ClCompile Include="ImageProcess.cpp" />
     <ClCompile Include="MainFrame.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="stdafx.cpp">

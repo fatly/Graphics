@@ -2,11 +2,15 @@
 #define __CORE_BITMAP_H__
 
 #include "Defines.h"
+#include "Object.h"
 #include <windows.h>
 
 namespace e
 {
-	class Bitmap
+	//------------------------------------------------------------------------
+	//----------------------device-iddependent-bitmap-------------------------
+	//------------------------------------------------------------------------
+	class Bitmap : public RefCountObj
 	{
 	public:
 		Bitmap(void);
@@ -26,9 +30,9 @@ namespace e
 		void SetColor32(uint8 r, uint8 g, uint8 b, uint8 a);
 		int PixelBytes(void) const;
 		int WidthBytes(void) const;
-		uint8* Get(uint x, uint y) const;
 		int Width(void) const;
 		int Height(void) const;
+		uint8* Get(uint x, uint y) const;
 		bool IsValid(void) const;
 		bool ExtendAlpha(uint8 alpahValue);
 		void Reverse(bool vertical = true);
@@ -68,9 +72,10 @@ namespace e
 		uint32  biClrImportant;
 	};
 	
+	//Save DIB to filesystem
 	bool SaveBitmap(HBITMAP hBitmap, const char* fileName);
 
-	bool SavePPM(const Bitmap* bitmap, const char* fileName);
+	bool Save2PPM(const Bitmap* bitmap, const char* fileName);
 }
 
 #endif

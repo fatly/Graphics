@@ -38,15 +38,35 @@ public:
 
 	Bitmap* LoadBitmap(const CString & filePath);
 
-	Bitmap* CloneBitmap(int x0, int y0, int x1, int y1);
+	Bitmap* CloneBitmap(const Bitmap* bitmap, int x0, int y0, int x1, int y1);
 
-	Bitmap* GetBitmap(void) const
+	void SetSrcBitmap(Bitmap* bitmap)
 	{
-		return m_pBitmap;
+		if (m_pSrcBitmap != 0)
+			delete m_pSrcBitmap;
+		m_pSrcBitmap = bitmap;
+	}
+
+	void SetDstBitmap(Bitmap* bitmap)
+	{
+		if (m_pDstBitmap != 0)
+			delete m_pDstBitmap;
+		m_pDstBitmap = bitmap;
+	}
+
+	Bitmap* GetSrcBitmap(void) const
+	{
+		return m_pSrcBitmap;
+	}
+
+	Bitmap* GetDstBitmap(void) const
+	{
+		return m_pDstBitmap;
 	}
 
 protected:
-	Bitmap* m_pBitmap;
+	Bitmap* m_pSrcBitmap;
+	Bitmap* m_pDstBitmap;
 // 生成的消息映射函数
 protected:
 	DECLARE_MESSAGE_MAP()

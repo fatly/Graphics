@@ -764,14 +764,14 @@ _error:
 			int width = x1 - x0 + 1;
 			int height = y1 - y0 + 1;
 
-			if (bitmap->Alloc(width, height, biBitCount, 0))
+			if (bitmap->Alloc(width, height, this->biBitCount, 0))
 			{
 				for (int i = 0; i < height; i++)
 				{
-					uint8* src = this->bits + (y0 + i) * this->WidthBytes() + x0 * PixelBytes();
-					uint8* dst = bitmap->bits + i * bitmap->WidthBytes();
+					uint8* src = this->Get(x0, y0 + i);
+					uint8* dst = bitmap->Get(0, i);
 					//for each line
-					memcpy(dst, src, width * PixelBytes());
+					memcpy(dst, src, width * this->PixelBytes());
 				}
 			}
 			else
@@ -819,6 +819,15 @@ _error:
 			return false;
 		}
 
+		uint8* bits = 0;
+		if (bm.bmBits == 0)//not DIB
+		{
+			int size = bm.bmHeight * bm.bmWidthBytes;
+			bits = new uint8[size];
+			if (bits == 0) return false;
+			GetBitmapBits(hBitmap, size, (void*)bits);
+		}
+
 		int bitCount = bm.bmPlanes * bm.bmBitsPixel;
 
 		if (bitCount == 1)
@@ -846,7 +855,16 @@ _error:
 			bitCount = 32;
 		}
 
-		return _SaveBitmap(fileName, (uint8*)bm.bmBits, bm.bmWidth, bm.bmHeight, bitCount, true);
+		if (bits == 0)
+		{
+			return _SaveBitmap(fileName, (uint8*)bm.bmBits, bm.bmWidth, bm.bmHeight, bitCount, true);
+		}
+		else
+		{
+			bool ret = _SaveBitmap(fileName, bits, bm.bmWidth, bm.bmHeight, bitCount, true);
+			delete[] bits;
+			return ret;
+		}
 	}
 
 	bool Save2PPM(const Bitmap* bitmap, const char* fileName)

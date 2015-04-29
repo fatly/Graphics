@@ -30,12 +30,14 @@ END_MESSAGE_MAP()
 CGraphicsDoc::CGraphicsDoc()
 {
 	// TODO:  在此添加一次性构造代码
-	m_pBitmap = 0;
+	m_pSrcBitmap = 0;
+	m_pDstBitmap = 0;
 }
 
 CGraphicsDoc::~CGraphicsDoc()
 {
-	SAFE_DELETE(m_pBitmap);
+	SAFE_DELETE(m_pSrcBitmap);
+	SAFE_DELETE(m_pDstBitmap);
 }
 
 BOOL CGraphicsDoc::OnNewDocument()
@@ -141,28 +143,30 @@ Bitmap* CGraphicsDoc::LoadBitmap(const CString & filePath)
 	USES_CONVERSION;
 	const char* fileName = W2A(filePath);
 
-	m_pBitmap = new Bitmap;
-	assert(m_pBitmap != 0);
+	m_pSrcBitmap = new Bitmap;
+	assert(m_pSrcBitmap != 0);
 
-	if (m_pBitmap != 0)
+	if (m_pSrcBitmap != 0)
 	{
-		if (!m_pBitmap->Load(fileName))
+		if (!m_pSrcBitmap->Load(fileName))
 		{
-			delete m_pBitmap;
-			m_pBitmap = 0;
+			delete m_pSrcBitmap;
+			m_pSrcBitmap = 0;
 		}
+
+		//m_pBitmap->ExtendAlpha(255);
 	}
 
-	return m_pBitmap;
+	return m_pSrcBitmap;
 }
 
-Bitmap* CGraphicsDoc::CloneBitmap(int x0, int y0, int x1, int y1)
+Bitmap* CGraphicsDoc::CloneBitmap(const Bitmap* bitmap, int x0, int y0, int x1, int y1)
 {
-	assert(m_pBitmap != 0);
+	assert(bitmap != 0);
 
-	if (m_pBitmap != 0)
+	if (bitmap != 0)
 	{
-		return m_pBitmap->Clone(x0, y0, x1, y1);
+		return bitmap->Clone(x0, y0, x1, y1);
 	}
 
 	return 0;

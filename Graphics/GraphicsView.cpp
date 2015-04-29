@@ -16,7 +16,6 @@
 #define new DEBUG_NEW
 #endif
 
-
 // CGraphicsView
 
 IMPLEMENT_DYNCREATE(CGraphicsView, CView)
@@ -32,6 +31,8 @@ BEGIN_MESSAGE_MAP(CGraphicsView, CView)
 	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
+	ON_WM_SIZE()
+	ON_WM_MOUSEWHEEL()
 END_MESSAGE_MAP()
 
 // CGraphicsView 构造/析构
@@ -39,7 +40,8 @@ END_MESSAGE_MAP()
 CGraphicsView::CGraphicsView()
 {
 	// TODO:  在此处添加构造代码
-	m_pBitmap = NULL;
+	m_pSrcBitmap = NULL;
+	m_pDstBitmap = NULL;
 	m_bMouseDown = FALSE;
 	m_pProcesser = new ImageProcess;
 	ASSERT(m_pProcesser != NULL);
@@ -47,7 +49,8 @@ CGraphicsView::CGraphicsView()
 
 CGraphicsView::~CGraphicsView()
 {
-	SAFE_DELETE(m_pBitmap);
+	SAFE_DELETE(m_pSrcBitmap);
+	SAFE_DELETE(m_pDstBitmap);
 	SAFE_DELETE(m_pProcesser);
 }
 
@@ -81,22 +84,30 @@ void CGraphicsView::OnDraw(CDC* /*pDC*/)
 	CBrush fillBrush(RGB(255, 255, 255));
 	dcMem.FillRect(&rc, &fillBrush);
 
-	if (m_pBitmap != NULL)
+	if (m_pSrcBitmap != NULL && m_pDstBitmap != NULL)
 	{
 		BITMAP bm;
-		m_pBitmap->GetBitmap(&bm);
+		m_pSrcBitmap->GetBitmap(&bm);
 
-		int x = (rc.Width() - bm.bmWidth) / 2;
+		int x = (rc.Width() - bm.bmWidth * 2) / 2;
 		int y = (rc.Height() - bm.bmHeight) / 2;
 		if (x < 0) x = 0;
 		if (y < 0) y = 0;
 
-		DrawBitmap(&dcMem, x, y, rc.Width(), rc.Height(), m_pBitmap, 0, 0);
+		DrawBitmap(&dcMem, x, y, rc.Width(), rc.Height(), m_pSrcBitmap, 0, 0);
+
+		x += bm.bmWidth;
+		DrawBitmap(&dcMem, x, y, rc.Width(), rc.Height(), m_pDstBitmap, 0, 0);
 	}
 
 	if (!m_rcSelected.IsRectEmpty())
 	{
 		DrawRect(&dcMem, &m_rcSelected, RGB(255, 0, 0));
+	}
+
+	if (!m_rcClient.IsRectEmpty())
+	{
+		DrawRect(&dcMem, &m_rcClient, RGB(0, 255, 0));
 	}
 
   	CClientDC dc(this);
@@ -205,15 +216,10 @@ CBitmap* CGraphicsView::CreateBitmap(const Bitmap* pBitmap)
 // 			, (void**)&bits
 // 			, NULL
 // 			, 0);
-// 		memcpy(bits, pBitmap->bits, pBitmap->size);
+//  		memcpy(bits, pBitmap->bits, pBitmap->size);
 
 		ASSERT(hBitmap != NULL);
-
 		pResult->Attach(hBitmap);
-
-		BITMAP bm;
-		pResult->GetBitmap(&bm);
-		int x = 0;
 	}
 
 	return pResult;
@@ -254,16 +260,26 @@ void CGraphicsView::OnFileOpen()
 	if (dlg.DoModal() == IDOK)
 	{
 		CGraphicsDoc* pDoc = GetDocument();
+
 		pDoc->LoadBitmap(dlg.GetPathName());
+		Bitmap* pBitmap = pDoc->GetSrcBitmap();
+
+		Bitmap* pPPM = pBitmap->Clone();
+		pPPM->SwapChannel(0, 2);
+		Save2PPM(pPPM, "f:\\1.ppm");
+		delete pPPM;
 #if 0
-		Bitmap* pBitmap = pDoc->GetBitmap();
 		m_pBitmap = new CBitmap;
 		m_pBitmap->CreateCompatibleBitmap(GetDC(), pBitmap->biWidth, pBitmap->biHeight);
 		m_pBitmap->ExtendAlpha(255);
 		m_pBitmap->SetBitmapBits(pBitmap->size, pBitmap->bits);
 #else
-		m_pBitmap = CreateBitmap(pDoc->GetBitmap());
+		m_pSrcBitmap = CreateBitmap(pBitmap);
 #endif
+		Bitmap* pResult = m_pProcesser->SmoothBitmap(pBitmap, 0.5f);
+		m_pDstBitmap = CreateBitmap(pResult);
+		pDoc->SetDstBitmap(pResult);
+
 		SendMessage(WM_PAINT, 0, 0);
 	}
 }
@@ -321,27 +337,31 @@ void CGraphicsView::OnLButtonUp(UINT nFlags, CPoint point)
 
 	m_rcSelected.NormalizeRect();
 
-	if (m_pBitmap && !m_rcSelected.IsRectEmpty())
+	if (m_pSrcBitmap && m_pDstBitmap)
 	{
 		CGraphicsDoc* pDoc = GetDocument();
-		Bitmap* pBitmap = pDoc->GetBitmap();
+		Bitmap* pBitmap = pDoc->GetSrcBitmap();
 
-		int xOffset = (rect.Width() - pBitmap->Width()) / 2;
+		int xOffset = (rect.Width() - pBitmap->Width()*2) / 2;
 		int yOffset = (rect.Height() - pBitmap->Height()) / 2;
 
-		int x0 = clamp(m_rcSelected.left - xOffset, 0, (int)pBitmap->biWidth - 1);
-		int y0 = clamp(m_rcSelected.top - yOffset, 0, (int)pBitmap->biHeight - 1);
-		int x1 = clamp(m_rcSelected.right - xOffset, 0, (int)pBitmap->biWidth - 1);
-		int y1 = clamp(m_rcSelected.bottom - yOffset, 0, (int)pBitmap->biHeight - 1);
-
-		pBitmap = pDoc->CloneBitmap(x0, y0, x1, y1);
-		assert(pBitmap != 0);
-
-		m_pProcesser->DrawRect(pBitmap, 0, 0, pBitmap->biWidth-1, pBitmap->biHeight-1);
-
-		pBitmap->Save("f:\\b.bmp");
-
-		delete pBitmap;
+		if (!m_rcSelected.IsRectEmpty())
+		{
+			int x0 = clamp(m_rcSelected.left - xOffset, 0, (int)pBitmap->biWidth - 1);
+			int y0 = clamp(m_rcSelected.top - yOffset, 0, (int)pBitmap->biHeight - 1);
+			int x1 = clamp(m_rcSelected.right - xOffset, 0, (int)pBitmap->biWidth - 1);
+			int y1 = clamp(m_rcSelected.bottom - yOffset, 0, (int)pBitmap->biHeight - 1);
+			//test clone
+			pBitmap = pDoc->CloneBitmap(pBitmap, x0, y0, x1, y1);
+			assert(pBitmap != 0);
+			m_pProcesser->DrawRect(pBitmap, 0, 0, pBitmap->biWidth-1, pBitmap->biHeight-1);
+			pBitmap->Save("f:\\b.bmp");
+			delete pBitmap;
+		}
+		else
+		{
+			m_rcSelected.SetRect(xOffset, yOffset, xOffset + pBitmap->biWidth, yOffset + pBitmap->biHeight);
+		}
 	}
 
 	m_bMouseDown = FALSE;
@@ -353,3 +373,57 @@ void CGraphicsView::OnLButtonUp(UINT nFlags, CPoint point)
 	CView::OnLButtonUp(nFlags, point);
 }
 
+void CGraphicsView::OnSize(UINT nType, int cx, int cy)
+{
+	CView::OnSize(nType, cx, cy);
+
+	// TODO:  在此处添加消息处理程序代码
+	static CSize size(cx, cy);
+
+	if (cx != size.cx || cy != size.cy)
+	{
+		float sw = cx / max(1.0f, size.cx);
+		float sh = cy / max(1.0f, size.cy);
+
+		size.SetSize(cx, cy);
+	}
+
+	m_rcClient.right = cx;
+	m_rcClient.bottom = cy;
+
+	TCHAR szBuffer[64] = { 0 };
+	_stprintf_s(szBuffer, TEXT("OnSize() : nType = %d, cx = %d, cy = %d\n"), nType, cx, cy);
+	OutputDebugString(szBuffer);
+}
+
+
+BOOL CGraphicsView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	static float sigma = 0.0f;
+
+	if (zDelta > 0)
+		sigma += 0.01f;
+	else
+		sigma -= 0.01f;
+
+	if (sigma < 0.0f) sigma = 0.0f;
+
+	CGraphicsDoc* pDoc = GetDocument();
+	Bitmap* src = pDoc->GetSrcBitmap();
+	Bitmap* dst = m_pProcesser->SmoothBitmap(src, sigma);
+
+	if (m_pDstBitmap != 0)
+		delete m_pDstBitmap;
+	m_pDstBitmap = CreateBitmap(dst);
+
+	pDoc->SetDstBitmap(dst);
+	
+	SendMessage(WM_PAINT, 0, 0);
+
+	TCHAR szBuffer[64] = { 0 };
+	_stprintf_s(szBuffer, TEXT("smooth sigma = %f\n"), sigma);
+	OutputDebugString(szBuffer);
+
+	return CView::OnMouseWheel(nFlags, zDelta, pt);
+}
