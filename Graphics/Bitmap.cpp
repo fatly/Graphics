@@ -260,11 +260,11 @@ _error:
 		assert(ret);
 	}
 
-	Bitmap::Bitmap(int width, int height, int bitCount, const uint8* bits)
+	Bitmap::Bitmap(int width, int height, int bitCount, const uint8* bits, bool init /* = true */)
 	{
 		Initialize();
-
-		Alloc(width, height, bitCount, bits);
+		bool ret = Alloc(width, height, bitCount, bits, init);
+		assert(ret);
 	}
 
 	Bitmap::~Bitmap()
@@ -334,7 +334,7 @@ _error:
 		biClrImportant = 0;
 	}
 
-	bool Bitmap::Alloc(int width, int height, int bitCount, const uint8* bits)
+	bool Bitmap::Alloc(int width, int height, int bitCount, const uint8* bits, bool init /* = true */)
 	{
 		assert(width > 0 && height > 0);
 		//ÏÈÇåÀí
@@ -381,7 +381,7 @@ _error:
 			{
 				memcpy(p, bits, imageSize * sizeof(uint8));
 			}
-			else
+			else if (init)
 			{
 				memset(p, 0, imageSize * sizeof(uint8));
 			}
@@ -399,7 +399,7 @@ _error:
 			{
 				memcpy(this->bits, bits, imageSize * sizeof(uint8));
 			}
-			else
+			else if (init)
 			{
 				memset(this->bits, 0, imageSize * sizeof(uint8));
 			}

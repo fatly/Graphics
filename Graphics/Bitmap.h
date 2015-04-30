@@ -16,12 +16,12 @@ namespace e
 		Bitmap(void);
 		Bitmap(const Bitmap & r);
 		Bitmap(const char* fileName, bool reverse = true);
-		Bitmap(int width, int height, int bitCount, const uint8* bits = 0);
+		Bitmap(int width, int height, int bitCount, const uint8* bits = 0, bool init = true);
 		virtual ~Bitmap(void);
 		const Bitmap & operator=(const Bitmap & r);
 		//默认分配是BGRA或者BGR格式
 		bool Load(const char* fileName, bool reverse = true);
-		bool Alloc(int width, int height, int bitCount, const uint8* bits = 0);
+		bool Alloc(int width, int height, int bitCount, const uint8* bits = 0, bool init = true);
 		void SwapChannel(int channel0, int channel1);
 		void SetColor8(uint8 color = 0x00);
 		void SetColor24(RGBA color = 0x00000000);//RGBA

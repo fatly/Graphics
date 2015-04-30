@@ -84,6 +84,18 @@
     <ClInclude Include="Misc.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Region.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseClass.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Convert.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Morphology.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graphics.cpp">
