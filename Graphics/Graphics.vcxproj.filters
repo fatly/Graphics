@@ -42,12 +42,6 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Bitmap.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Defines.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="MainFrame.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -66,36 +60,6 @@
     <ClInclude Include="ViewTree.h">
       <Filter>头文件\VS</Filter>
     </ClInclude>
-    <ClInclude Include="ImageProcess.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="BitmapGlyph.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="AutoPtr.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Convolve.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Misc.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Region.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseClass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Convert.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Morphology.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Graphics.cpp">
@@ -108,9 +72,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsView.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Bitmap.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MainFrame.cpp">
@@ -130,15 +91,6 @@
     </ClCompile>
     <ClCompile Include="ViewTree.cpp">
       <Filter>源文件\VS</Filter>
-    </ClCompile>
-    <ClCompile Include="ImageProcess.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="BitmapGlyph.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

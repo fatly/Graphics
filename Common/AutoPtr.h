@@ -56,10 +56,10 @@ namespace e
 			return (*this);
 		}
 
-		AutoPtr<T> & operator =(T *)
-		{
-			return (operator =(t.p));
-		}
+// 		AutoPtr<T> & operator =(T * t)
+// 		{
+// 			return (operator =(t));
+// 		}
 
 		void Clear(void)
 		{

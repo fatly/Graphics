@@ -11,7 +11,6 @@
 
 #include "GraphicsDoc.h"
 #include "GraphicsView.h"
-#include "BaseClass.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -447,7 +446,7 @@ void CGraphicsView::UpdateBitmap(float sigma)
 {
 	CGraphicsDoc* pDoc = GetDocument();
 	Bitmap* src = pDoc->GetSrcBitmap();
-	Bitmap* dst = m_pProcesser->SmoothBitmap(src, sigma);
+	Bitmap* dst = m_pProcesser->SmoothBitmap(src, sigma, 0);
 
 	if (m_pDstBitmap != 0)
 		delete m_pDstBitmap;

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "ImageProcess.h"
 #include "BaseClass.h"
 #include "Convolve.h"
@@ -21,16 +20,22 @@ namespace e
 
 	}
 
-	Bitmap* ImageProcess::Convert2HSV(const Bitmap* src, float hfactor, float sfactor, float vfactor)
+	Bitmap* ImageProcess::HSVFilter(const Bitmap* src
+		, const float minH
+		, const float maxH
+		, const float minS
+		, const float maxS
+		, const float minV
+		, const float maxV)
 	{
 		assert(src->IsValid() && src->biBitCount >= 24);
 
-		Bitmap* dst = new Bitmap(src->Width(), src->Height(), 24, 0, false);
+		Bitmap* dst = new Bitmap(src->Width(), src->Height(), 8, 0, false);
 		assert(dst != 0);
 
 		if (dst != 0)
 		{
-			HSV(dst, src, hfactor, sfactor, vfactor);
+			HSVFilter8(dst, src, minH, maxH, minS, maxS, minV, maxV);
 		}
 
 		return dst;
@@ -66,10 +71,11 @@ namespace e
 		return dst;
 	}
 
-	Bitmap* ImageProcess::SmoothBitmap(const Bitmap* src, float sigma)
+	Bitmap* ImageProcess::SmoothBitmap(const Bitmap* src, float sigma, int mode)
 	{
-		assert(src->IsValid() && src->biBitCount >= 24);
-		//根据sigma计算出积卷内核
+		assert(src->IsValid());
+		assert(src->biBitCount == 8 || src->biBitCount >= 24);
+		//根据sigma计算出高斯积卷内核
 		const float width = 4.0f;
 		sigma = max(sigma, 0.01f);
 		int size = (int)ceil(sigma * width) + 1;
@@ -95,8 +101,16 @@ namespace e
 		Bitmap* dst = new Bitmap(src->Width(), src->Height(), src->biBitCount);
 		assert(tmp && dst);
 
-		ConvolveEven(tmp, src, mask, size);
-		ConvolveEven(dst, tmp, mask, size);
+		if (mode == 0)
+		{
+			ConvolveEven(tmp, src, mask, size);
+			ConvolveEven(dst, tmp, mask, size);
+		}
+		else
+		{
+			ConvolveOdd(tmp, src, mask, size);
+			ConvolveOdd(dst, tmp, mask, size);
+		}
 
 		delete[] mask;
 		delete tmp;
@@ -218,14 +232,12 @@ namespace e
 		return dst;
 	}
 
-
 	Bitmap* ImageProcess::RobertBitmap(const Bitmap* src)
 	{
 		assert(src->IsValid() && src->biBitCount == 8);
 
 		int w = src->Width();
 		int h = src->Height();
-
 		int lineBytes = src->WidthBytes();
 		int bytesPerPixel = src->PixelBytes();
 
@@ -377,6 +389,15 @@ namespace e
 		}
 
 		return bitmap;
+	}
+
+	Bitmap* ImageProcess::DrawRect(Bitmap* bitmap
+		, const Rect* rect
+		, int lineWidth /* = 1  */
+		, RGBA color /* = 0xff0000ff */)
+	{
+		assert(bitmap->IsValid());
+		return DrawRect(bitmap, rect->x0, rect->y0, rect->x1, rect->y1, lineWidth, color);
 	}
 }
 

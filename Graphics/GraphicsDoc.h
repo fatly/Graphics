@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include "Bitmap.h"
 using namespace e;
 
 class CGraphicsDoc : public CDocument

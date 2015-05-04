@@ -60,21 +60,6 @@
     <ClInclude Include="MainFrame.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Bitmap.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Convert.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Defines.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Array.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HSVFilter.cpp">
@@ -105,12 +90,6 @@
       <Filter>源文件\VS</Filter>
     </ClCompile>
     <ClCompile Include="MainFrame.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Bitmap.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Object.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

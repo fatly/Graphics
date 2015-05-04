@@ -1,6 +1,7 @@
-#include "stdafx.h"
 #include "BitmapGlyph.h"
 #include <Windows.h>
+#include <tchar.h>
+#include <assert.h>
 
 namespace e
 {

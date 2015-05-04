@@ -50,8 +50,9 @@ protected:
 	CEdit m_editMaxV;
 
 	CBitmap* m_pSrcBitmap;
-	CBitmap* m_pDstBitmap;
+	CBitmap* m_pHSVBitmap;
 	BOOL m_bLoadBitmap;
+	BOOL m_bNeedUpdateBitmap;
 // 生成的消息映射函数
 protected:
 	afx_msg void OnFilePrintPreview();

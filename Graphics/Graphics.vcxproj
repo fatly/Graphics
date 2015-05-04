@@ -109,42 +109,26 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AutoPtr.h" />
-    <ClInclude Include="BaseClass.h" />
-    <ClInclude Include="Bitmap.h" />
-    <ClInclude Include="BitmapGlyph.h" />
     <ClInclude Include="ClassView.h" />
-    <ClInclude Include="Convert.h" />
-    <ClInclude Include="Convolve.h" />
-    <ClInclude Include="Defines.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="GraphicsDoc.h" />
     <ClInclude Include="GraphicsView.h" />
-    <ClInclude Include="ImageProcess.h" />
     <ClInclude Include="MainFrame.h" />
-    <ClInclude Include="Misc.h" />
-    <ClInclude Include="Morphology.h" />
-    <ClInclude Include="Object.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="PropertiesWnd.h" />
-    <ClInclude Include="Region.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Bitmap.cpp" />
-    <ClCompile Include="BitmapGlyph.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="GraphicsDoc.cpp" />
     <ClCompile Include="GraphicsView.cpp" />
-    <ClCompile Include="ImageProcess.cpp" />
     <ClCompile Include="MainFrame.cpp" />
-    <ClCompile Include="Object.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="stdafx.cpp">

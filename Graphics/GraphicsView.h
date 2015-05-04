@@ -3,9 +3,7 @@
 //
 
 #pragma once
-#include "BitmapGlyph.h"
-#include "ImageProcess.h"
-using namespace e;
+
 
 class CGraphicsView : public CView
 {

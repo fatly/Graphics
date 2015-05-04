@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Bitmap.h"
 #include <assert.h>
 #include <memory.h>

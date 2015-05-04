@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include "Array.h"
-#include "Bitmap.h"
 using namespace e;
 
 class CHSVFilterDoc : public CDocument

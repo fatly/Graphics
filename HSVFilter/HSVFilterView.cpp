@@ -11,7 +11,6 @@
 
 #include "HSVFilterDoc.h"
 #include "HSVFilterView.h"
-#include "Convert.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,6 +28,17 @@ inline CString F2A(float x)
 	CString text;
 	text.Format(TEXT("%.2f"), x);
 	return text;
+}
+
+inline BOOL DrawBitmap(CDC* pDC, int x, int y, int w, int h, CBitmap* pBitmap, int xSrc, int ySrc)
+{
+	ASSERT(pDC != NULL && pBitmap != NULL);
+
+	CDC dc;
+	dc.CreateCompatibleDC(NULL);
+	dc.SelectObject(pBitmap);
+
+	return pDC->BitBlt(x, y, w, h, &dc, xSrc, ySrc, SRCCOPY);
 }
 
 // CHSVFilterView
@@ -54,16 +64,17 @@ CHSVFilterView::CHSVFilterView()
 {
 	// TODO:  在此处添加构造代码
 	m_pSrcBitmap = new CBitmap;
-	m_pDstBitmap = new CBitmap;
+	m_pHSVBitmap = new CBitmap;
 	m_bLoadBitmap = FALSE;
+	m_bNeedUpdateBitmap = TRUE;
 }
 
 CHSVFilterView::~CHSVFilterView()
 {
 	if (m_pSrcBitmap)
 		delete m_pSrcBitmap;
-	if (m_pDstBitmap)
-		delete m_pDstBitmap;
+	if (m_pHSVBitmap)
+		delete m_pHSVBitmap;
 }
 
 BOOL CHSVFilterView::PreCreateWindow(CREATESTRUCT& cs)
@@ -84,10 +95,7 @@ void CHSVFilterView::OnDraw(CDC* /*pDC*/)
 		return;
 
 	// TODO:  在此处为本机数据添加绘制代码
-	if (m_bLoadBitmap)
-	{
-		UpdateView();
-	}
+	UpdateView();
 }
 
 
@@ -259,8 +267,6 @@ int CHSVFilterView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_editMinV.SetWindowText(TEXT("0.10"));
 	m_editMaxV.SetWindowText(TEXT("1.00"));
 
-	m_ctrlMinH.SetBuddy(&m_editMinH);
-
 	return 0;
 }
 
@@ -381,10 +387,7 @@ void CHSVFilterView::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		m_editMaxV.SetWindowText(F2A((float)nPos / 100));
 	}
 
-	if (m_bLoadBitmap)
-	{
-		UpdateView();
-	}
+	UpdateView();
 
 	CView::OnHScroll(nSBCode, nPos, pScrollBar);
 }
@@ -393,6 +396,7 @@ void CHSVFilterView::OnFileOpen()
 {
 	// TODO:  在此添加命令处理程序代码
 	CFileDialog dlg(TRUE, TEXT("*.BMP"), TEXT("*.BMP"));
+
 	if (dlg.DoModal() == IDOK)
 	{
 		CHSVFilterDoc* pDoc = GetDocument();
@@ -423,63 +427,73 @@ void CHSVFilterView::OnFileOpen()
 		m_pSrcBitmap->Attach(hBitmap);
 
 		m_bLoadBitmap = TRUE;
+		m_bNeedUpdateBitmap = TRUE;
 
 		UpdateView();
 	}
 }
 
-inline BOOL DrawBitmap(CDC* pDC, int x, int y, int w, int h, CBitmap* pBitmap, int xSrc, int ySrc)
-{
-	ASSERT(pDC != NULL && pBitmap != NULL);
-
-	CDC dc;
-	dc.CreateCompatibleDC(NULL);
-	dc.SelectObject(pBitmap);
-
-	return pDC->BitBlt(x, y, w, h, &dc, xSrc, ySrc, SRCCOPY);
-}
-
 void CHSVFilterView::UpdateView(void)
 {
-	float fMinH = m_ctrlMinH.GetPos();
-	float fMaxH = m_ctrlMaxH.GetPos();
-	float fMinS = m_ctrlMinS.GetPos() * 1.0f / 100.0f;
-	float fMaxS = m_ctrlMaxS.GetPos() * 1.0f / 100.0f;
-	float fMinV = m_ctrlMinV.GetPos() * 1.0f / 100.0f;
-	float fMaxV = m_ctrlMaxV.GetPos() * 1.0f / 100.0f;
+	if (!m_bLoadBitmap) return;
+
+	static float fMinH = 0.0f;
+	static float fMaxH = 0.0f;
+	static float fMinS = 0.0f;
+	static float fMaxS = 0.0f;
+	static float fMinV = 0.0f;
+	static float fMaxV = 0.0f;
+
+	float _fMinH = m_ctrlMinH.GetPos() * 1.0f;
+	float _fMaxH = m_ctrlMaxH.GetPos() * 1.0f;
+	float _fMinS = m_ctrlMinS.GetPos() * 1.0f / 100.0f;
+	float _fMaxS = m_ctrlMaxS.GetPos() * 1.0f / 100.0f;
+	float _fMinV = m_ctrlMinV.GetPos() * 1.0f / 100.0f;
+	float _fMaxV = m_ctrlMaxV.GetPos() * 1.0f / 100.0f;
+
+	if (_fMinH != fMinH){ fMinH = _fMinH; m_bNeedUpdateBitmap = TRUE; }
+	if (_fMaxH != fMaxH){ fMaxH = _fMaxH; m_bNeedUpdateBitmap = TRUE; }
+	if (_fMinS != fMinS){ fMinS = _fMinS; m_bNeedUpdateBitmap = TRUE; }
+	if (_fMaxS != fMaxS){ fMaxS = _fMaxS; m_bNeedUpdateBitmap = TRUE; }
+	if (_fMinV != fMinV){ fMinV = _fMinV; m_bNeedUpdateBitmap = TRUE; }
+	if (_fMaxV != fMaxV){ fMaxV = _fMaxV; m_bNeedUpdateBitmap = TRUE; }
 
 	if (fMinH > fMaxH) swap(fMinH, fMaxH);
 	if (fMinS > fMaxS) swap(fMinS, fMaxS);
 	if (fMinV > fMaxV) swap(fMinV, fMaxV);
 
 	Bitmap* pSrcBitmap = GetDocument()->GetBitmap(0);
-	Bitmap* pDstBitmap = new Bitmap(pSrcBitmap->Width(), pSrcBitmap->Height(), 24);
 
-	HSVFilter24(pDstBitmap, pSrcBitmap, fMinH, fMaxH, fMinS, fMaxS, fMinV, fMaxV);
+	if (m_bNeedUpdateBitmap)
+	{
+		Bitmap* pDstBitmap = new Bitmap(pSrcBitmap->Width(), pSrcBitmap->Height(), 24);
+		HSVFilter24(pDstBitmap, pSrcBitmap, fMinH, fMaxH, fMinS, fMaxS, fMinV, fMaxV);
 
-	BITMAPINFOHEADER bi;
-	bi.biSize		= sizeof(bi);
-	bi.biWidth		= pDstBitmap->biWidth;
-	bi.biHeight		= pDstBitmap->biHeight;
-	bi.biBitCount	= pDstBitmap->biBitCount;
-	bi.biPlanes		= pDstBitmap->biPlanes;
-	bi.biSizeImage	= pDstBitmap->biSizeImage;
-	bi.biCompression = pDstBitmap->biCompression;
-	bi.biClrImportant = pDstBitmap->biClrImportant;
-	bi.biClrUsed	= pDstBitmap->biClrUsed;
-	bi.biHeight		= -bi.biHeight;
+		BITMAPINFOHEADER bi;
+		bi.biSize = sizeof(bi);
+		bi.biWidth = pDstBitmap->biWidth;
+		bi.biHeight = pDstBitmap->biHeight;
+		bi.biBitCount = pDstBitmap->biBitCount;
+		bi.biPlanes = pDstBitmap->biPlanes;
+		bi.biSizeImage = pDstBitmap->biSizeImage;
+		bi.biCompression = pDstBitmap->biCompression;
+		bi.biClrImportant = pDstBitmap->biClrImportant;
+		bi.biClrUsed = pDstBitmap->biClrUsed;
+		bi.biHeight = -bi.biHeight;
 
-	HBITMAP hBitmap = CreateDIBitmap(GetDC()->GetSafeHdc()
-		, &bi
-		, CBM_INIT
-		, (void*)pDstBitmap->bits
-		, (BITMAPINFO*)&bi
-		, DIB_RGB_COLORS);
+		HBITMAP hBitmap = CreateDIBitmap(GetDC()->GetSafeHdc()
+			, &bi
+			, CBM_INIT
+			, (void*)pDstBitmap->bits
+			, (BITMAPINFO*)&bi
+			, DIB_RGB_COLORS);
 
-	delete pDstBitmap;
+		delete pDstBitmap;
+		m_pHSVBitmap->DeleteObject();
+		m_pHSVBitmap->Attach(hBitmap);
+		m_bNeedUpdateBitmap = FALSE;
+	}
 
-	m_pDstBitmap->DeleteObject();
-	m_pDstBitmap->Attach(hBitmap);
 	//render bitmap
 	CRect rect;
 	GetClientRect(&rect);
@@ -500,7 +514,7 @@ void CHSVFilterView::UpdateView(void)
 
 	DrawBitmap(&dcMem, x, y, w, h, m_pSrcBitmap, 0, 0);
 	x += pSrcBitmap->Width();
-	DrawBitmap(&dcMem, x, y, w, h, m_pDstBitmap, 0, 0);
+	DrawBitmap(&dcMem, x, y, w, h, m_pHSVBitmap, 0, 0);
 
 	CClientDC dc(this);
 	dc.BitBlt(0, 0, rect.Width(), rect.Height(), &dcMem, 0, 0, SRCCOPY);
