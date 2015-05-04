@@ -458,16 +458,16 @@ void CHSVFilterView::UpdateView(void)
 	HSVFilter24(pDstBitmap, pSrcBitmap, fMinH, fMaxH, fMinS, fMaxS, fMinV, fMaxV);
 
 	BITMAPINFOHEADER bi;
-	bi.biSize = sizeof(bi);
-	bi.biWidth = pDstBitmap->biWidth;
-	bi.biHeight = pDstBitmap->biHeight;
-	bi.biBitCount = pDstBitmap->biBitCount;
-	bi.biPlanes = pDstBitmap->biPlanes;
-	bi.biSizeImage = pDstBitmap->biSizeImage;
+	bi.biSize		= sizeof(bi);
+	bi.biWidth		= pDstBitmap->biWidth;
+	bi.biHeight		= pDstBitmap->biHeight;
+	bi.biBitCount	= pDstBitmap->biBitCount;
+	bi.biPlanes		= pDstBitmap->biPlanes;
+	bi.biSizeImage	= pDstBitmap->biSizeImage;
 	bi.biCompression = pDstBitmap->biCompression;
 	bi.biClrImportant = pDstBitmap->biClrImportant;
-	bi.biClrUsed = pDstBitmap->biClrUsed;
-	bi.biHeight = -bi.biHeight;
+	bi.biClrUsed	= pDstBitmap->biClrUsed;
+	bi.biHeight		= -bi.biHeight;
 
 	HBITMAP hBitmap = CreateDIBitmap(GetDC()->GetSafeHdc()
 		, &bi
@@ -486,7 +486,6 @@ void CHSVFilterView::UpdateView(void)
 
 	CDC dcMem;
 	dcMem.CreateCompatibleDC(NULL);
-
 	CBitmap bmMem;
 	bmMem.CreateCompatibleBitmap(GetDC(), rect.Width(), rect.Height());
 	dcMem.SelectObject(&bmMem);

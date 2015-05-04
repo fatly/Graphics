@@ -11,6 +11,7 @@
 
 #include "GraphicsDoc.h"
 #include "GraphicsView.h"
+#include "BaseClass.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -451,10 +452,6 @@ void CGraphicsView::UpdateBitmap(float sigma)
 	if (m_pDstBitmap != 0)
 		delete m_pDstBitmap;
 	m_pDstBitmap = CreateBitmap(dst);
-
-	Bitmap* diff = m_pProcesser->Difference(dst);
-	diff->Save("f:\\diff.bmp");
-	delete diff;
 
 	Bitmap* gray = m_pProcesser->GrayBitmap(dst);
 	gray->Save("f:\\gray.bmp");

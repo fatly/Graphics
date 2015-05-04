@@ -110,9 +110,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AutoPtr.h" />
+    <ClInclude Include="BaseClass.h" />
     <ClInclude Include="Bitmap.h" />
     <ClInclude Include="BitmapGlyph.h" />
     <ClInclude Include="ClassView.h" />
+    <ClInclude Include="Convert.h" />
     <ClInclude Include="Convolve.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="FileView.h" />
@@ -122,9 +124,11 @@
     <ClInclude Include="ImageProcess.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="Misc.h" />
+    <ClInclude Include="Morphology.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="PropertiesWnd.h" />
+    <ClInclude Include="Region.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

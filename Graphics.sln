@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\Graphics.vcxproj", "{CD056680-3D4F-4C47-B00F-556C8FA9EAB5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HSVFilter", "HSVFilter\HSVFilter.vcxproj", "{B0C1D9A5-2658-4E74-9011-8C8B14968337}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "Common\Common.vcxproj", "{E227B177-91FA-4F02-8666-2AE195744E95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B0C1D9A5-2658-4E74-9011-8C8B14968337}.Debug|Win32.Build.0 = Debug|Win32
 		{B0C1D9A5-2658-4E74-9011-8C8B14968337}.Release|Win32.ActiveCfg = Release|Win32
 		{B0C1D9A5-2658-4E74-9011-8C8B14968337}.Release|Win32.Build.0 = Release|Win32
+		{E227B177-91FA-4F02-8666-2AE195744E95}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E227B177-91FA-4F02-8666-2AE195744E95}.Debug|Win32.Build.0 = Debug|Win32
+		{E227B177-91FA-4F02-8666-2AE195744E95}.Release|Win32.ActiveCfg = Release|Win32
+		{E227B177-91FA-4F02-8666-2AE195744E95}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
