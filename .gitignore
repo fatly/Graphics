@@ -6,3 +6,4 @@
 *.sdf
 *.opensdf
 /ipch
+/lib/*.lib

@@ -1,15 +1,15 @@
 
-// HSVFilterDoc.cpp : CHSVFilterDoc 类的实现
+// GLFitlerDoc.cpp : CGLFitlerDoc 类的实现
 //
 
 #include "stdafx.h"
 // SHARED_HANDLERS 可以在实现预览、缩略图和搜索筛选器句柄的
 // ATL 项目中进行定义，并允许与该项目共享文档代码。
 #ifndef SHARED_HANDLERS
-#include "HSVFilter.h"
+#include "GLFitler.h"
 #endif
 
-#include "HSVFilterDoc.h"
+#include "GLFitlerDoc.h"
 
 #include <propkey.h>
 
@@ -17,33 +17,32 @@
 #define new DEBUG_NEW
 #endif
 
-// CHSVFilterDoc
+// CGLFitlerDoc
 
-IMPLEMENT_DYNCREATE(CHSVFilterDoc, CDocument)
+IMPLEMENT_DYNCREATE(CGLFitlerDoc, CDocument)
 
-BEGIN_MESSAGE_MAP(CHSVFilterDoc, CDocument)
+BEGIN_MESSAGE_MAP(CGLFitlerDoc, CDocument)
 END_MESSAGE_MAP()
 
 
-// CHSVFilterDoc 构造/析构
+// CGLFitlerDoc 构造/析构
 
-CHSVFilterDoc::CHSVFilterDoc()
+CGLFitlerDoc::CGLFitlerDoc()
 {
 	// TODO:  在此添加一次性构造代码
 
 }
 
-CHSVFilterDoc::~CHSVFilterDoc()
+CGLFitlerDoc::~CGLFitlerDoc()
 {
-	int count = m_BitmapArray.size();
-	for (int i = 0; i < count; i++)
+	for (size_t i = 0; i < m_BitmapArray.size(); i++)
 	{
-		Bitmap* p = m_BitmapArray[i];
-		delete p;
+		Bitmap* pBitmap = m_BitmapArray[i];
+		delete pBitmap;
 	}
 }
 
-BOOL CHSVFilterDoc::OnNewDocument()
+BOOL CGLFitlerDoc::OnNewDocument()
 {
 	if (!CDocument::OnNewDocument())
 		return FALSE;
@@ -57,9 +56,9 @@ BOOL CHSVFilterDoc::OnNewDocument()
 
 
 
-// CHSVFilterDoc 序列化
+// CGLFitlerDoc 序列化
 
-void CHSVFilterDoc::Serialize(CArchive& ar)
+void CGLFitlerDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
 	{
@@ -74,7 +73,7 @@ void CHSVFilterDoc::Serialize(CArchive& ar)
 #ifdef SHARED_HANDLERS
 
 // 缩略图的支持
-void CHSVFilterDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
+void CGLFitlerDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
 {
 	// 修改此代码以绘制文档数据
 	dc.FillSolidRect(lprcBounds, RGB(255, 255, 255));
@@ -95,7 +94,7 @@ void CHSVFilterDoc::OnDrawThumbnail(CDC& dc, LPRECT lprcBounds)
 }
 
 // 搜索处理程序的支持
-void CHSVFilterDoc::InitializeSearchContent()
+void CGLFitlerDoc::InitializeSearchContent()
 {
 	CString strSearchContent;
 	// 从文档数据设置搜索内容。
@@ -105,7 +104,7 @@ void CHSVFilterDoc::InitializeSearchContent()
 	SetSearchContent(strSearchContent);
 }
 
-void CHSVFilterDoc::SetSearchContent(const CString& value)
+void CGLFitlerDoc::SetSearchContent(const CString& value)
 {
 	if (value.IsEmpty())
 	{
@@ -125,27 +124,28 @@ void CHSVFilterDoc::SetSearchContent(const CString& value)
 
 #endif // SHARED_HANDLERS
 
-// CHSVFilterDoc 诊断
+// CGLFitlerDoc 诊断
 
 #ifdef _DEBUG
-void CHSVFilterDoc::AssertValid() const
+void CGLFitlerDoc::AssertValid() const
 {
 	CDocument::AssertValid();
 }
 
-void CHSVFilterDoc::Dump(CDumpContext& dc) const
+void CGLFitlerDoc::Dump(CDumpContext& dc) const
 {
 	CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
 
-// CHSVFilterDoc 命令
-BOOL CHSVFilterDoc::OpenFile(const CString & fileName)
+// CGLFitlerDoc 命令
+BOOL CGLFitlerDoc::OpenFile(const CString & fileName)
 {
 	USES_CONVERSION;
 	const char* path = W2A(fileName);
 	Bitmap* pBitmap = new Bitmap(path);
+	assert(pBitmap != 0);
 
 	if (m_BitmapArray.size() > 0)
 	{

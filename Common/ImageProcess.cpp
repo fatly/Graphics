@@ -278,7 +278,7 @@ namespace e
 	{
 		assert(src->IsValid() && src->biBitCount == 8);
 
-		Bitmap* dst = new Bitmap(src->Width(), src->Width(), 8, 0);
+		Bitmap* dst = new Bitmap(src->Width(), src->Height(), 8, 0);
 		assert(dst != 0);
 
 		if (dst != 0)
@@ -293,7 +293,7 @@ namespace e
 	{
 		assert(src->IsValid() && src->biBitCount == 8);
 
-		Bitmap* dst = new Bitmap(src->Width(), src->Width(), 8, 0);
+		Bitmap* dst = new Bitmap(src->Width(), src->Height(), 8, 0);
 		assert(dst != 0);
 
 		if (dst != 0)
