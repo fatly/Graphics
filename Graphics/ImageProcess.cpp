@@ -3,6 +3,7 @@
 #include "Convolve.h"
 #include "Misc.h"
 #include "Bitmap.h"
+#include <math.h>
 
 namespace e
 {
@@ -63,7 +64,7 @@ namespace e
 		float sum = 0.0f;
 		for (int i = 0; i < size; i++)
 		{
-			mask[i] = exp(-0.5*square(i / sigma));
+			mask[i] = (float)exp(-0.5*square(i / sigma));
 			sum += fabs(mask[i]);
 		}
 		sum -= fabs(mask[0]);
@@ -83,6 +84,88 @@ namespace e
 
 		delete[] mask;
 		delete tmp;
+
+		return dst;
+	}
+
+	inline float diff(const Bitmap* src, int x0, int y0, int x1, int y1)
+	{
+		uint8* p0 = src->Get(x0, y0);
+		uint8* p1 = src->Get(x1, y1);
+
+		return sqrt((float)square(*(p0 + 0) - *(p1 + 0))
+			+ square(*(p0 + 1) - *(p1 + 1))
+			+ square(*(p0 + 2) - *(p1 + 2)));
+	}
+
+	Bitmap* ImageProcess::Difference(const Bitmap* src)
+	{
+		assert(src->IsValid() && src->biBitCount == 24);
+
+		int w = src->Width();
+		int h = src->Height();
+
+		Bitmap* dst = new Bitmap(w, h, 8);
+		assert(dst);
+
+		for (int y = 0; y < h; y++)
+		{
+			uint8* p = dst->Get(0, y);
+
+			for (int x = 0; x < w; x++)
+			{
+				float sum = 0.0f;
+
+				if (x < w - 1)
+				{
+					sum += diff(src, x, y, x + 1, y);
+				}
+
+				if (y < h - 1)
+				{
+					sum += diff(src, x, y, x, y + 1);
+				}
+
+				if (x < w - 1 && y < h - 1)
+				{
+					sum += diff(src, x, y, x + 1, y + 1);
+				}
+
+				if (x < w - 1 && y>0)
+				{
+					sum += diff(src, x, y, x + 1, y - 1);
+				}
+
+				*p++ = sum > 160 ? 255 : 0;
+			}
+		}
+
+		return dst;
+	}
+
+	Bitmap* ImageProcess::BinaryBitmap(const Bitmap* src, int threshold)
+	{
+		assert(src->IsValid() && src->biBitCount == 8);
+
+		int w = src->Width();
+		int h = src->Height();
+
+		Bitmap* dst = new Bitmap(w, h, 8);
+		assert(dst != 0);
+		
+		for (int y = 0; y < h; y++)
+		{
+			uint8* p0 = src->Get(0, y);
+			uint8* p1 = dst->Get(0, y);
+
+			for (int x = 0; x < w; x++)
+			{
+				*p1 = (*p0 < threshold) ? 0 : 255;
+
+				p0++;
+				p1++;
+			}
+		}
 
 		return dst;
 	}

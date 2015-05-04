@@ -51,6 +51,10 @@ namespace e
 
 		Bitmap* SmoothBitmap(const Bitmap* src, float sigma);
 
+		Bitmap* Difference(const Bitmap* src);
+
+		Bitmap* BinaryBitmap(const Bitmap* src, int threshold);
+
 		Bitmap* DrawRect(Bitmap* bitmap
 			, int x0
 			, int y0

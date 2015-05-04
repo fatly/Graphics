@@ -16,6 +16,7 @@
 #define new DEBUG_NEW
 #endif
 
+float sigma = 0.5f;
 // CGraphicsView
 
 IMPLEMENT_DYNCREATE(CGraphicsView, CView)
@@ -33,6 +34,7 @@ BEGIN_MESSAGE_MAP(CGraphicsView, CView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 // CGraphicsView 构造/析构
@@ -108,6 +110,11 @@ void CGraphicsView::OnDraw(CDC* /*pDC*/)
 	if (!m_rcClient.IsRectEmpty())
 	{
 		DrawRect(&dcMem, &m_rcClient, RGB(0, 255, 0));
+	}
+
+	if (!m_strText.IsEmpty())
+	{
+		DrawString(&dcMem, 100, m_rcClient.bottom - 30, m_strText);
 	}
 
   	CClientDC dc(this);
@@ -249,6 +256,12 @@ inline BOOL CGraphicsView::DrawBitmap(CDC* pDC, const CRect* pRect, CBitmap* pBi
 	return DrawBitmap(pDC, pRect->left, pRect->top, pRect->right, pRect->bottom, pBitmap, xSrc, ySrc);
 }
 
+inline BOOL CGraphicsView::DrawString(CDC* pDC, int x, int y, const CString & strText)
+{
+	ASSERT(pDC != 0);
+	return pDC->TextOut(x, y, strText);
+}
+
 
 // CGraphicsView 消息处理程序
 
@@ -276,11 +289,13 @@ void CGraphicsView::OnFileOpen()
 #else
 		m_pSrcBitmap = CreateBitmap(pBitmap);
 #endif
-		Bitmap* pResult = m_pProcesser->SmoothBitmap(pBitmap, 0.5f);
-		m_pDstBitmap = CreateBitmap(pResult);
-		pDoc->SetDstBitmap(pResult);
-
-		SendMessage(WM_PAINT, 0, 0);
+// 		Bitmap* pResult = m_pProcesser->SmoothBitmap(pBitmap, sigma);
+// 		m_pDstBitmap = CreateBitmap(pResult);
+// 		pDoc->SetDstBitmap(pResult);
+// 
+// 		m_strText.Format(TEXT("smooth sigma = %f"), sigma);
+//		SendMessage(WM_PAINT, 0, 0);
+		UpdateBitmap(sigma);
 	}
 }
 
@@ -355,7 +370,7 @@ void CGraphicsView::OnLButtonUp(UINT nFlags, CPoint point)
 			pBitmap = pDoc->CloneBitmap(pBitmap, x0, y0, x1, y1);
 			assert(pBitmap != 0);
 			m_pProcesser->DrawRect(pBitmap, 0, 0, pBitmap->biWidth-1, pBitmap->biHeight-1);
-			pBitmap->Save("f:\\b.bmp");
+			pBitmap->Save("f:\\clone.bmp");
 			delete pBitmap;
 		}
 		else
@@ -390,25 +405,45 @@ void CGraphicsView::OnSize(UINT nType, int cx, int cy)
 
 	m_rcClient.right = cx;
 	m_rcClient.bottom = cy;
-
-	TCHAR szBuffer[64] = { 0 };
-	_stprintf_s(szBuffer, TEXT("OnSize() : nType = %d, cx = %d, cy = %d\n"), nType, cx, cy);
-	OutputDebugString(szBuffer);
 }
 
 
 BOOL CGraphicsView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
-	static float sigma = 0.0f;
-
 	if (zDelta > 0)
-		sigma += 0.01f;
+		sigma += 0.1f;
 	else
-		sigma -= 0.01f;
+		sigma -= 0.1f;
 
 	if (sigma < 0.0f) sigma = 0.0f;
 
+	UpdateBitmap(sigma);
+
+	return CView::OnMouseWheel(nFlags, zDelta, pt);
+}
+
+void CGraphicsView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	if (nChar == 38)
+	{
+		sigma += 0.1f;
+	}
+	else if (nChar == 40)
+	{
+		sigma -= 0.1f;
+	}
+
+	if (sigma < 0.0f) sigma = 0.0f;
+
+	UpdateBitmap(sigma);
+
+	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+void CGraphicsView::UpdateBitmap(float sigma)
+{
 	CGraphicsDoc* pDoc = GetDocument();
 	Bitmap* src = pDoc->GetSrcBitmap();
 	Bitmap* dst = m_pProcesser->SmoothBitmap(src, sigma);
@@ -417,13 +452,20 @@ BOOL CGraphicsView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		delete m_pDstBitmap;
 	m_pDstBitmap = CreateBitmap(dst);
 
+	Bitmap* diff = m_pProcesser->Difference(dst);
+	diff->Save("f:\\diff.bmp");
+	delete diff;
+
+	Bitmap* gray = m_pProcesser->GrayBitmap(dst);
+	gray->Save("f:\\gray.bmp");
+	Bitmap* bin = m_pProcesser->BinaryBitmap(gray, 128);
+	delete gray;
+	bin->Save("f:\\bin.bmp");
+	delete bin;
+
 	pDoc->SetDstBitmap(dst);
-	
+
+	m_strText.Format(TEXT("smooth sigma = %f\n"), sigma);
+
 	SendMessage(WM_PAINT, 0, 0);
-
-	TCHAR szBuffer[64] = { 0 };
-	_stprintf_s(szBuffer, TEXT("smooth sigma = %f\n"), sigma);
-	OutputDebugString(szBuffer);
-
-	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }

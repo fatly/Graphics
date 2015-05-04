@@ -40,7 +40,9 @@ public:
 	inline VOID DrawRect(CDC* pDC, const CRect* pRect, COLORREF color);
 	inline BOOL DrawBitmap(CDC* pDC, int x, int y, int w, int h, CBitmap* pBitmap, int xSrc, int ySrc);
 	inline BOOL DrawBitmap(CDC* pDC, const CRect* pRect, CBitmap* pBitmap, int xSrc, int ySrc);
+	inline BOOL DrawString(CDC* pDC, int x, int y, const CString & strText);
 	ImageProcess* GetImageProcesser(void) const{ return m_pProcesser;}
+	void UpdateBitmap(float sigma);
 protected:
 	CRect			m_rcClient;
 	CBitmap*		m_pSrcBitmap;
@@ -49,6 +51,7 @@ protected:
 	CRect			m_rcSelected;
 	BOOL			m_bMouseDown;
 	ImageProcess*	m_pProcesser;
+	CString			m_strText;
 // 生成的消息映射函数
 protected:
 	afx_msg void OnFilePrintPreview();
@@ -62,6 +65,7 @@ public:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
 #ifndef _DEBUG  // GraphicsView.cpp 中的调试版本

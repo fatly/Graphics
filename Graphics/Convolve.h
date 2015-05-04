@@ -26,16 +26,16 @@ namespace e
 
 				for (int i = 1; i < size; i++)
 				{
-					sum[0] += (*(p0 - bytesPerPixel) - *(p0 + bytesPerPixel)) * mask[i];
-					sum[1] += (*(p1 - bytesPerPixel) - *(p1 + bytesPerPixel)) * mask[i];
-					sum[2] += (*(p2 - bytesPerPixel) - *(p2 + bytesPerPixel)) * mask[i];
+					sum[0] += (*(p0 - bytesPerPixel) + *(p0 + bytesPerPixel)) * mask[i];
+					sum[1] += (*(p1 - bytesPerPixel) + *(p1 + bytesPerPixel)) * mask[i];
+					sum[2] += (*(p2 - bytesPerPixel) + *(p2 + bytesPerPixel)) * mask[i];
 				}
 
 				uint8* p3 = dst->Get(y, x);
 
-				*(p3 + 0) = clamp(sum[0], 0, 255);
-				*(p3 + 1) = clamp(sum[1], 0, 255);
-				*(p3 + 2) = clamp(sum[2], 0, 255);
+				*(p3 + 0) = (uint8)clamp(sum[0], 0, 255);
+				*(p3 + 1) = (uint8)clamp(sum[1], 0, 255);
+				*(p3 + 2) = (uint8)clamp(sum[2], 0, 255);
 
 				p0 += bytesPerPixel;
 				p1 += bytesPerPixel;
