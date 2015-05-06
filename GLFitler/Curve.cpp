@@ -16,7 +16,6 @@ namespace e
 
 	Curve::Curve()
 	{
-		type = CURVE_TYPE_UNKNOWN;
 		pointCount = 0;
 		points = 0;
 		sampleCount = 0;
@@ -33,45 +32,30 @@ namespace e
 
 	void Curve::Initialize(void)
 	{
-		SetCurveType(CURVE_TYPE_SMOOTH);
-
 		SetPointCount(17);
-
-		//Point p[17];
-		//memset(&p, 0, sizeof(Point)* 17);
-		//SetPoints(17, p);
 
 		SetSampleCount(256);
 
-		//double s[256] = { 0.0 };
-		//SetSamples(256, s);
+		InitPointAndSample();
 	}
 
-	void Curve::SetCurveType(CurveType type)
+	void Curve::InitPointAndSample()
 	{
-		if (this->type != type)
+		for (int i = 0; i < pointCount; i++)
 		{
-			this->type = type;
+			points[i].x = -1.0;
+			points[i].y = -1.0;
+		}
 
-			if (this->type == CURVE_TYPE_SMOOTH)
-			{
-				for (int i = 0; i < pointCount; i++)
-				{
-					points[i].x = -1.0;
-					points[i].y = -1.0;
-				}
+		int count = clamp(9, pointCount / 2, pointCount);
 
-				int count = clamp(9, pointCount / 2, pointCount);
+		for (int i = 0; i < count; i++)
+		{
+			int sample = i * (sampleCount - 1) / (count - 1);
+			int point = i * (pointCount - 1) / (count - 1);
 
-				for (int i = 0; i < count; i++)
-				{
-					int sample = i * (sampleCount - 1) / (count - 1);
-					int point = i * (pointCount - 1) / (count - 1);
-
-					points[point].x = (double)sample / (double)(sampleCount - 1);
-					points[point].y = samples[sample];
-				}
-			}
+			points[point].x = (double)sample / (double)(sampleCount - 1);
+			points[point].y = samples[sample];
 		}
 	}
 
@@ -84,6 +68,7 @@ namespace e
 			this->pointCount = pointCount;
 
 			points = (Vector2*)realloc(points, sizeof(Vector2)* pointCount);
+			assert(points);
 
 			points[0].x = 0.0;
 			points[0].y = 0.0;
@@ -97,10 +82,7 @@ namespace e
 			points[pointCount - 1].x = 1.0;
 			points[pointCount - 1].y = 1.0;
 
-			if (this->type = CURVE_TYPE_SMOOTH)
-			{
-				identity = true;
-			}
+			identity = true;
 		}
 	}
 
@@ -116,6 +98,7 @@ namespace e
 			this->sampleCount = sampleCount;
 
 			samples = (double*)realloc(samples, sampleCount * sizeof(double));
+			assert(samples);
 
 			for (int i = 0; i < sampleCount; i++)
 			{
@@ -123,16 +106,14 @@ namespace e
 			}
 
 			tables = (byte*)realloc(tables, sampleCount * sizeof(byte));
+			assert(tables);
 
 			for (int i = 0; i < sampleCount; i++)
 			{
 				tables[i] = (byte)(samples[i] * 255);
 			}
 
-			if (this->type == CURVE_TYPE_FREE)
-			{
-				identity = true;
-			}
+			identity = true;
 		}
 	}
 
@@ -140,11 +121,6 @@ namespace e
 	{
 		assert(x == -1.0 || x >= 0.0 && x <= 1.0);
 		assert(y == -1.0 || y >= 0.0 && y <= 1.0);
-
-		if (this->type == CURVE_TYPE_FREE)
-		{
-			return;
-		}
 
 		points[index].x = x;
 		points[index].y = y;
@@ -186,11 +162,6 @@ namespace e
 		points[pointCount - 1].x = 1.0;
 		points[pointCount - 1].y = 1.0;
 
-		if (resetType)
-		{
-			this->type = CURVE_TYPE_SMOOTH;
-		}
-
 		identity = true;
 	}
 
@@ -199,67 +170,61 @@ namespace e
 		int p1, p2, p3, p4;
 		int count;
 
-		int* p = (int*)alloca(this->pointCount * sizeof(int));
+		int* p = (int*)malloc(this->pointCount * sizeof(int));
+		assert(p);
 
-		switch (this->type)
+		count = 0;
+		for (int i = 0; i < pointCount; i++)
 		{
-		case CURVE_TYPE_SMOOTH:
-			count = 0;
-			for (int i = 0; i < pointCount; i++)
+			if (points[i].x >= 0.0)
 			{
-				if (points[i].x >= 0.0)
-				{
-					p[count++] = i;
-				}
+				p[count++] = i;
 			}
-
-			if (count != 0)
-			{
-				Vector2 pt = points[p[0]];
-				int boundary = ROUND(pt.x * (double)(sampleCount - 1));
-
-				for (int i = 0; i < boundary; i++)
-				{
-					samples[i] = pt.y;
-				}
-
-				pt = points[p[count - 1]];
-				boundary = ROUND(pt.x * (double)(sampleCount - 1));
-
-				for (int i = boundary; i < sampleCount; i++)
-				{
-					samples[i] = pt.y;
-				}
-
-				for (int i = 0; i < count - 1; i++)
-				{
-					p1 = p[max(i - 1, 0)];
-					p2 = p[i];
-					p3 = p[i + 1];
-					p4 = p[min(i + 2, count - 1)];
-
-					Plot(p1, p2, p3, p4);
-				}
-
-				for (int i = 0; i < count; i++)
-				{
-					double x = points[p[i]].x;
-					double y = points[p[i]].y;
-
-					samples[ROUND(x * (double)(sampleCount - 1))] = y;
-				}
-			}
-
-			for (int i = 0; i < sampleCount; i++)
-			{
-				this->tables[i] = (byte)(samples[i] * 255);
-			}
-
-			break;
-		case CURVE_TYPE_FREE:
-
-			break;
 		}
+
+		if (count != 0)
+		{
+			Vector2 pt = points[p[0]];
+			int boundary = ROUND(pt.x * (double)(sampleCount - 1));
+
+			for (int i = 0; i < boundary; i++)
+			{
+				samples[i] = pt.y;
+			}
+
+			pt = points[p[count - 1]];
+			boundary = ROUND(pt.x * (double)(sampleCount - 1));
+
+			for (int i = boundary; i < sampleCount; i++)
+			{
+				samples[i] = pt.y;
+			}
+
+			for (int i = 0; i < count - 1; i++)
+			{
+				p1 = p[max(i - 1, 0)];
+				p2 = p[i];
+				p3 = p[i + 1];
+				p4 = p[min(i + 2, count - 1)];
+
+				Plot(p1, p2, p3, p4);
+			}
+
+			for (int i = 0; i < count; i++)
+			{
+				double x = points[p[i]].x;
+				double y = points[p[i]].y;
+
+				samples[ROUND(x * (double)(sampleCount - 1))] = y;
+			}
+		}
+
+		for (int i = 0; i < sampleCount; i++)
+		{
+			this->tables[i] = (byte)(samples[i] * 255);
+		}
+
+		free(p);
 	}
 
 	void Curve::Plot(int p1, int p2, int p3, int p4)
@@ -411,9 +376,10 @@ namespace e
 	{
 		if (this != &r)
 		{
-			this->type = r.type;
 			this->pointCount = r.pointCount;
 			this->points = (Vector2*)realloc(this->points, sizeof(Vector2)* this->pointCount);
+			assert(this->points);
+
 			for (int i = 0; i < pointCount; i++)
 			{
 				this->points[i] = r.points[i];
@@ -421,12 +387,16 @@ namespace e
 
 			this->sampleCount = r.sampleCount;
 			this->samples = (double*)realloc(this->samples, sizeof(double)* this->sampleCount);
+			assert(this->samples);
+
 			for (int i = 0; i < sampleCount; i++)
 			{
 				this->samples[i] = r.samples[i];
 			}
 
 			this->tables = (byte*)realloc(this->tables, sizeof(byte) * this->sampleCount);
+			assert(this->tables);
+
 			for (int i = 0; i < sampleCount; i++)
 			{
 				this->tables[i] = r.tables[i];
@@ -438,29 +408,23 @@ namespace e
 		return *this;
 	}
 
+	//////////////////////////////////////////////////////////////////////////
+	//class CurvesConfig 
+	//////////////////////////////////////////////////////////////////////////
 	CurvesConfig::CurvesConfig(void)
 	{
 		channel = 0;
 		for (int i = 0; i < 5; i++)
 		{
-			curves[i] = 0;
+			curves[i] = new Curve;
+			assert(curves[i] != 0);
+			curves[i]->Initialize();
 		}
 	}
 
 	CurvesConfig::~CurvesConfig(void)
 	{
 		Cleanup();
-	}
-
-	void CurvesConfig::Initialize(void)
-	{
-		for (int i = 0; i < 5; i++)
-		{
-			curves[i] = new Curve;
-			assert(curves[i] != 0);
-
-			curves[i]->Initialize();
-		}
 	}
 
 	void CurvesConfig::Calculate(void)
@@ -478,11 +442,9 @@ namespace e
 		assert(channel >= CURVE_CHANNEL_C && channel <= CURVE_CHANNEL_A);
 		assert(count >= 2 && count <= 1024);
 
-		Curve * curve = curves[channel];
+		Curve* curve = curves[channel];
 
-		curve->SetCurveType(CURVE_TYPE_SMOOTH);
 		curve->SetSampleCount(count);
-
 		curve->SetPoint(curve->pointCount - 1, -1.0, -1.0);
 
 		for (int i = 0; i < count; i++)
@@ -496,7 +458,8 @@ namespace e
 		assert(channel >= CURVE_CHANNEL_C && channel <= CURVE_CHANNEL_A);
 		assert(count >= 2 && count <= 1024);
 
-		double * p = (double*)malloc(sizeof(double) * 2 * count);
+		double* p = (double*)malloc(sizeof(double) * 2 * count);
+		assert(p);
 
 		for (int i = 0; i < count; i++)
 		{
@@ -531,7 +494,7 @@ namespace e
 		{
 			if (curves[i] != 0)
 			{
-				free(curves[i]);
+				delete curves[i];
 				curves[i] = 0;
 			}
 		}

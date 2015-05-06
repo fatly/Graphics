@@ -205,11 +205,11 @@ int CGLFitlerView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_ctrlRadius.SetRange(1, 10);
 	m_ctrlSigma.SetRange(1, 200);
-	m_ctrlRadius.SetPos(2);
-	m_ctrlSigma.SetPos(5);
+	m_ctrlRadius.SetPos(3);
+	m_ctrlSigma.SetPos(30);
 
-	m_editRadius.SetWindowText(TEXT("2"));
-	m_editSigma.SetWindowText(TEXT("0.5"));
+	m_editRadius.SetWindowText(TEXT("3"));
+	m_editSigma.SetWindowText(TEXT("3.0"));
 
 	return 0;
 }
@@ -269,6 +269,7 @@ void CGLFitlerView::OnFileOpen()
 {
 	// TODO:  在此添加命令处理程序代码
 	CFileDialog dlg(TRUE, TEXT("*.BMP"), TEXT("*.BMP"));
+	//CString pathName = TEXT("C:\\Users\\yongfali\\Desktop\\test.bmp");
 
 	if (dlg.DoModal() == IDOK)
 	{

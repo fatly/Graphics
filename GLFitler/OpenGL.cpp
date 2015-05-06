@@ -572,6 +572,11 @@ namespace e
 			"	}																					\n"
 			"}																						\n"
 
+			"vec4 hardlight(vec4 a, vec4 b)															\n"
+			"{																						\n"
+			"	return vec4(hardlight(a.x, b.x), hardlight(a.y, b.y), hardlight(a.z, b.z), 1.0);    \n"
+			"}																						\n"
+
 			"vec4 softlight(vec4 a, vec4 b)															\n"
 			"{																						\n"
 			"	//return vec4(softlight(a.x, b.x), softlight(a.y, b.y), softlight(a.z, b.z), 1.0);	\n"
@@ -594,9 +599,9 @@ namespace e
 			"	return c;																			\n"
 			"}																						\n"
 
-			"vec4 alpha_blend(vec4 a, vec4 b)														\n"
+			"vec4 alpha_blend(vec4 base, vec4 blend, flaot a)										\n"
 			"{																						\n"
-			"	return a * vec4(1.0 - b.a) + b * vec4(b.a);											\n"
+			"	return base * vec4(1.0 - a) + b * vec4(a);											\n"
 			"}																						\n"
 
 			"void main(void)																		\n"
@@ -607,15 +612,15 @@ namespace e
 			"	vec4 a = texture2D(Texture0, uv);													\n"
 			"	vec4 b = gauss_filter(kernal, radius, Texture0, uv, TexSize);						\n"
 			"   vec4 c = softlight(b, a);															\n"
-			"                                                                                       \n"
+			"   //vec4 d = hardlight(c, a);                                                           \n"
 			"	if (enableMatte == 0)																\n"
 			"	{																					\n"
 			"		gl_FragColor = c;																\n"
 			"   }																					\n"
 			"   else																				\n"
 			"	{																					\n"
-			"       vec4 d = texture2D(Texture1, uv);												\n"
-			"		gl_FragColor = alpha_blend(c, d);												\n"
+			"       vec4 e = texture2D(Texture1, uv);												\n"
+			"		gl_FragColor = alpha_blend(c, e, e.a);											\n"
 			"   }																					\n"
 			"}																						\n"
 			, count

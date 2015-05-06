@@ -7,7 +7,7 @@ namespace e
 	ImageFilter::ImageFilter(HDC dc)
 	{
 		config = new CurvesConfig;
-		config->Initialize();
+		//config = 0;
 
 		opengl = new e::OpenGL(dc);
 		assert(opengl);
@@ -31,6 +31,8 @@ namespace e
 
 	void ImageFilter::SetFilterType(int type)
 	{
+		if (config == 0) return;
+
 		config->Reset();
 
 		switch (type)
@@ -546,7 +548,7 @@ namespace e
 
 	void ImageFilter::Process(unsigned char * buffer, int width, int height, int mode /* = 0x03 */)
 	{
-		if (mode & 0x00000001)
+		if (config && mode & 0x00000001)
 		{
 			int bytesPerPixel = 3;
 			int lineBytes = WIDTHBYTES(width * 24);
@@ -569,7 +571,7 @@ namespace e
 			}
 		}
 
-		if (mode & 0x00000002)
+		if (opengl && mode & 0x00000002)
 		{
 			//Èá»¯Æ½»¬
 			opengl->Process(buffer, width, height, 24);

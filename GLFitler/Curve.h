@@ -11,6 +11,12 @@ namespace e
 			x = y = 0.0;
 		}
 
+		Vector2(double x, double y)
+		{
+			this->x = x;
+			this->y = y;
+		}
+
 		Vector2(const Vector2 & r)
 		{
 			this->x = r.x;
@@ -33,17 +39,15 @@ namespace e
 		double y;
 	};
 
-	typedef enum { CURVE_TYPE_UNKNOWN, CURVE_TYPE_SMOOTH, CURVE_TYPE_FREE } CurveType;
-
 	class Curve
 	{
 	public:
 		Curve(void);
 		virtual ~Curve(void);
 		void Initialize(void);
-		void SetCurveType(CurveType type);
 		void SetPointCount(int pointCount);
 		void SetSampleCount(int sampleCount);
+		void InitPointAndSample(void);
 		void SetPoint(int index, double x, double y);
 		void SetPoints(int count, Vector2 * points);
 		void SetSamples(int count, double * samples);
@@ -57,7 +61,6 @@ namespace e
 		const Curve & operator=(const Curve & r);
 
 	public:
-		CurveType	type;
 		int			pointCount;
 		Vector2*	points;
 		int			sampleCount;
@@ -81,7 +84,6 @@ namespace e
 	public:
 		CurvesConfig(void);
 		virtual ~CurvesConfig(void);
-		void Initialize(void);
 		void Calculate(void);
 		void CreateSpline(int channel, int count, double * points);
 		void CreateSplineCruft(int channel, int count, uint8 * points);
@@ -92,7 +94,7 @@ namespace e
 		const CurvesConfig & operator=(const CurvesConfig & r);
 	public:
 		int channel;
-		Curve * curves[5];
+		Curve* curves[5];
 	};
 }
 

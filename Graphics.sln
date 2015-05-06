@@ -13,6 +13,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "Common\Common.vcxproj", "{E227B177-91FA-4F02-8666-2AE195744E95}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLFitler", "GLFitler\GLFitler.vcxproj", "{C5233479-382D-43FA-BAA5-80B9F15C5C9E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E227B177-91FA-4F02-8666-2AE195744E95} = {E227B177-91FA-4F02-8666-2AE195744E95}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

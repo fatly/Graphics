@@ -7,3 +7,4 @@
 *.opensdf
 /ipch
 /lib/*.lib
+lib/CommonD.lib
