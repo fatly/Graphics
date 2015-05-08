@@ -17,6 +17,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLFitler", "GLFitler\GLFitl
 		{E227B177-91FA-4F02-8666-2AE195744E95} = {E227B177-91FA-4F02-8666-2AE195744E95}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoftGlow", "SoftGlow\SoftGlow.vcxproj", "{1C2A82E7-51E5-4185-BDBC-396B5DBD5097}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E227B177-91FA-4F02-8666-2AE195744E95} = {E227B177-91FA-4F02-8666-2AE195744E95}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -39,6 +44,10 @@ Global
 		{C5233479-382D-43FA-BAA5-80B9F15C5C9E}.Debug|Win32.Build.0 = Debug|Win32
 		{C5233479-382D-43FA-BAA5-80B9F15C5C9E}.Release|Win32.ActiveCfg = Release|Win32
 		{C5233479-382D-43FA-BAA5-80B9F15C5C9E}.Release|Win32.Build.0 = Release|Win32
+		{1C2A82E7-51E5-4185-BDBC-396B5DBD5097}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1C2A82E7-51E5-4185-BDBC-396B5DBD5097}.Debug|Win32.Build.0 = Debug|Win32
+		{1C2A82E7-51E5-4185-BDBC-396B5DBD5097}.Release|Win32.ActiveCfg = Release|Win32
+		{1C2A82E7-51E5-4185-BDBC-396B5DBD5097}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

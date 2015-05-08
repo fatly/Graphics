@@ -3,8 +3,8 @@
 
 #include <windows.h>
 
-void GetExecuteDirectoryW(wchar_t * pszPath, int nMaxCount);
-void GetExecuteDirectoryA(char * pszPath, int nMaxCount);
+void GetExecuteDirectoryW(wchar_t* pszPath, int nMaxCount);
+void GetExecuteDirectoryA(char* pszPath, int nMaxCount);
 
 char* ReadFile(const char* fileName, int & length);
 void Release(char* & buffer);

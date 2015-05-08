@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <locale.h>
 
-void GetExecuteDirectoryW(wchar_t * pszPath, int nMaxCount)
+void GetExecuteDirectoryW(wchar_t* pszPath, int nMaxCount)
 {
 	wchar_t path[MAX_PATH] = { 0 };
 	GetModuleFileNameW(NULL, path, MAX_PATH);
@@ -23,7 +23,7 @@ void GetExecuteDirectoryW(wchar_t * pszPath, int nMaxCount)
 	wcscpy_s(pszPath, nMaxCount, path);
 }
 
-void GetExecuteDirectoryA(char * pszPath, int nMaxCount)
+void GetExecuteDirectoryA(char* pszPath, int nMaxCount)
 {
 	char path[MAX_PATH] = { 0 };
 	GetModuleFileNameA(NULL, path, MAX_PATH);

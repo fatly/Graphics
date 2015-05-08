@@ -123,7 +123,10 @@ namespace e
 	bool OpenGL::Process(uint8 * buffer, int width, int height, int bitCount)
 	{
 		//init glsl
-		Initialize(dc, width, height);
+		if (!Initialize(dc, width, height))
+		{
+			return false;
+		}
 
 		glBindTexture(GL_TEXTURE_2D, texInput);
 
@@ -281,9 +284,7 @@ namespace e
 	{
 		GLint result = GL_FALSE;
 		GLuint vs, fs;
-#if 1
-		GenFile();
-
+#if 0
 		char basePath[MAX_PATH] = { 0 };
 		char fileName[MAX_PATH] = { 0 };
 		GetExeDir(basePath, MAX_PATH);
@@ -302,15 +303,23 @@ namespace e
 			return false;
 		}
 #else
-		if (!CreateShaderEx(vexterShader, GL_VERTEX_SHADER, vs))
+		if (!CreateShaderEx(g_vexterShader, GL_VERTEX_SHADER, vs))
+		{
+			return false;
+		}
+		const char* fragmentShader = CreateShaderString(radius, sigma);
+		if (fragmentShader == 0)
 		{
 			return false;
 		}
 
 		if (!CreateShaderEx(fragmentShader, GL_FRAGMENT_SHADER, fs))
 		{
+			delete fragmentShader;
 			return false;
 		}
+
+		delete fragmentShader;
 #endif
 		program = glCreateProgram();
 
@@ -488,157 +497,6 @@ namespace e
 	{
 		this->radius = radius;
 		this->sigma = sigma;
-	}
-
-	inline double Calc(int x, int y, float sigma)
-	{
-		return exp(-(x*x + y*y) / (2 * sigma * sigma)) / (2 * 3.141592654 * sigma * sigma);
-	}
-
-	void OpenGL::MakeGauss(char** buffer, int size)
-	{
-		assert(buffer != 0);
-		double values[30][30] = { 0 };
-		double sum = 0.0;
-
-		for (int y = -radius; y <= radius; y++)
-		{
-			for (int x = -radius; x <= radius; x++)
-			{
-				double a = Calc(x, y, sigma);
-				values[y + radius][x + radius] = a;
-				sum += a;
-			}
-		}
-
-		for (int index = 0, y = -radius; y <= radius; y++)
-		{
-			strcat_s(*buffer, size, "\t");
-			char text[128] = { 0 };
-			for (int x = -radius; x <= radius; x++, index++)
-			{
-				double a = values[y + radius][x + radius];
-				a /= sum;
-				values[y + radius][x + radius] = a;
-				sprintf_s(text, "kernal[%d] = float(%lf); ", index, a);
-				strcat_s(*buffer, size, text);
-			}
-			strcat_s(*buffer, size, "\r\n");
-		}
-	}
-
-	void OpenGL::GenFile(void)
-	{
-		int size = 4096 * 5;
-		char* buffer = new char[size];
-		memset(buffer, 0, sizeof(char) * size);
-
-		char* kernal = new char[size];
-		memset(kernal, 0, sizeof(char)* size);
-
-		int count = (radius * 2 + 1) * (radius * 2 + 1);
-
-		MakeGauss(&kernal, size);
-
-		sprintf_s(buffer
-			, size
-			, "uniform sampler2D Texture0;															\n"
-			"uniform sampler2D Texture1;															\n"
-			"uniform vec2 TexSize;																	\n"
-			"uniform int enableMatte;																\n"
-			"float kernal[%d];																		\n"
-
-			"float hardlight(float a, float b)														\n"
-			"{																						\n"
-			"	if (b <= 0.5)																		\n"
-			"	{																					\n"
-			"		return a * b / 0.5;																\n"
-			"	}																					\n"
-			"	else																				\n"
-			"	{																					\n"
-			"		return 1.0 - (1.0 - a) * (1.0 - b) / 0.5;										\n"
-			"	}																					\n"
-			"}																						\n"
-
-			"float softlight(float a, float b)														\n"
-			"{																						\n"
-			"	if (b <= 0.5)																		\n"
-			"	{																					\n"
-			"		return a * b / 0.5 + (a / 1.0) * (a / 1.0) * (1.0 - 2 * b);						\n"
-			"	}																					\n"
-			"	else																				\n"
-			"	{																					\n"
-			"		return a * (1.0 - b) / 0.5 + sqrt(a / 1.0) * (2.0 * b - 1.0);					\n"
-			"	}																					\n"
-			"}																						\n"
-
-			"vec4 hardlight(vec4 a, vec4 b)															\n"
-			"{																						\n"
-			"	return vec4(hardlight(a.x, b.x), hardlight(a.y, b.y), hardlight(a.z, b.z), 1.0);    \n"
-			"}																						\n"
-
-			"vec4 softlight(vec4 a, vec4 b)															\n"
-			"{																						\n"
-			"	//return vec4(softlight(a.x, b.x), softlight(a.y, b.y), softlight(a.z, b.z), 1.0);	\n"
-			"	return 2.0 * a * b + a * a - 2.0 * a * a * b;										\n"
-			"}																						\n"
-
-			"vec4 gauss_filter(float kernal[%d], int radius, sampler2D image, vec2 uv, vec2 texSize)\n"
-			"{																						\n"
-			"	vec4 c = vec4(0.0, 0.0, 0.0, 0.0);													\n"
-			"   float dx = 1.0 / texSize.x;															\n"
-			"   float dy = 1.0 / texSize.y;															\n"
-			"	for (int n=0, y=-radius; y<=radius; y++)											\n"
-			"	{																					\n"
-			"		for (int x=-radius; x<=radius; x++, n++)										\n"
-			"		{																				\n"
-			"			vec2 _uv = vec2(uv.x + x * dx, uv.y + y * dy);								\n"
-			"			c += texture2D(image, _uv) * kernal[n];										\n"
-			"		}																				\n"
-			"	}																					\n"
-			"	return c;																			\n"
-			"}																						\n"
-
-			"vec4 alpha_blend(vec4 base, vec4 blend, flaot a)										\n"
-			"{																						\n"
-			"	return base * vec4(1.0 - a) + b * vec4(a);											\n"
-			"}																						\n"
-
-			"void main(void)																		\n"
-			"{																						\n"
-			"	int radius = %d;																	\n"
-			"%s\n"
-			"	vec2 uv = gl_TexCoord[0].st;														\n"
-			"	vec4 a = texture2D(Texture0, uv);													\n"
-			"	vec4 b = gauss_filter(kernal, radius, Texture0, uv, TexSize);						\n"
-			"   vec4 c = softlight(b, a);															\n"
-			"   //vec4 d = hardlight(c, a);                                                           \n"
-			"	if (enableMatte == 0)																\n"
-			"	{																					\n"
-			"		gl_FragColor = c;																\n"
-			"   }																					\n"
-			"   else																				\n"
-			"	{																					\n"
-			"       vec4 e = texture2D(Texture1, uv);												\n"
-			"		gl_FragColor = alpha_blend(c, e, e.a);											\n"
-			"   }																					\n"
-			"}																						\n"
-			, count
-			, count
-			, radius
-			, kernal);
-
-		char path[MAX_PATH] = { 0 };
-		GetExecuteDirectoryA(path, MAX_PATH);
-		strcat_s(path, MAX_PATH, "\\filter.fs");
-
-		FILE* fp = NULL;
-		fopen_s(&fp, path, "w");
-		fwrite(buffer, 1, strlen(buffer) + 1, fp);
-		fclose(fp);
-
-		delete[] kernal;
-		delete[] buffer;
 	}
 
 	void OpenGL::Cleanup(void)

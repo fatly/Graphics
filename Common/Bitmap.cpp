@@ -82,7 +82,7 @@ namespace e
 			//assert(bitmap.biHeader.biSizeImage == lineBytes * bitmap.biHeader.biHeight);
 
 			bitmap.size = lineBytes * bitmap.biHeight;
-			bitmap.bits = new uint8[bitmap.size];
+			bitmap.bits = (uint8*)realloc(bitmap.bits, bitmap.size);
 			assert(bitmap.bits != 0);
 
 			if (bitmap.bits == 0) break;
@@ -91,7 +91,7 @@ namespace e
 
 			if (!read(bitmap.bits, bitmap.size, fp))
 			{
-				delete bitmap.bits;
+				free(bitmap.bits);
 				bitmap.bits = 0;
 				bitmap.size = 0;
 				return false;
@@ -177,7 +177,7 @@ namespace e
 
 			if (bitCount == 8)
 			{
-				RGBQUAD * rgbQuad = new RGBQUAD[1 << bitCount];
+				RGBQUAD* rgbQuad = new RGBQUAD[1 << bitCount];
 				assert(rgbQuad != 0);
 
 				for (int i = 0; i < (1 << bitCount); i++)
@@ -248,7 +248,7 @@ _error:
 		this->biClrImportant = r.biClrImportant;
 		//BITMAP DATA
 		this->size = r.size;
-		this->bits = new uint8[size];
+		this->bits = (uint8*)malloc(this->size);
 		assert(this->bits != 0);
 		memcpy(this->bits, r.bits, this->size);
 	}
@@ -295,16 +295,14 @@ _error:
 			this->biClrUsed = r.biClrUsed;
 			this->biClrImportant = r.biClrImportant;
 			//BITMAP DATA
-			if (this->bits != 0 && this->size != r.size)
+			if (this->size != r.size)
 			{
-				delete[] this->bits;
-				this->bits = 0;
+				this->bits = (uint8*)realloc(this->bits, r.size);
+				assert(this->bits);
 			}
 
 			this->size = r.size;
-			this->bits = new uint8[size];
-			assert(bits != 0);
-			memcpy(bits, r.bits, size);
+			memcpy(this->bits, r.bits, size);
 		}
 
 		return *this;
@@ -336,9 +334,7 @@ _error:
 
 	bool Bitmap::Alloc(int width, int height, int bitCount, const uint8* bits, bool init /* = true */)
 	{
-		assert(width > 0 && height > 0);
-		//先清理
-		this->Cleanup(); 
+		assert(width > 0 && height > 0 && bitCount > 0);
 
 		int lineBytes = WIDTHBYTES(width * bitCount);
 		int imageSize = lineBytes * height;
@@ -357,7 +353,12 @@ _error:
 			this->bfSize = 54 + imageSize;
 		}
 
-		bool flag = (biWidth != width || biHeight != height || biBitCount != bitCount);
+		if (this->size != imageSize)
+		{
+			this->bits = (uint8*)realloc(this->bits, imageSize);
+			assert(this->bits != 0);
+			if (this->bits == 0) return false;
+		}
 
 		this->biSize = 40;
 		this->biWidth = width;
@@ -370,43 +371,17 @@ _error:
 		this->biClrImportant = 0;
 		this->biXPelsPerMeter = 3780;
 		this->biYPelsPerMeter = 3780;
+		this->size = imageSize;
 
-		if (flag)//当宽与高发生改变时候才重新申请内存
+		if (bits != 0)
 		{
-			uint8 * p = new uint8[imageSize];
-			assert(p != 0);
-			if (p == 0) return false;
-
-			if (bits != 0)
-			{
-				memcpy(p, bits, imageSize * sizeof(uint8));
-			}
-			else if (init)
-			{
-				memset(p, 0, imageSize * sizeof(uint8));
-			}
-
-			if (this->bits != 0)
-			{
-				delete[] this->bits;
-			}
-
-			this->bits = p;
+			memcpy(this->bits, bits, imageSize * sizeof(uint8));
 		}
-		else
+		else if (init)
 		{
-			if (bits != 0)
-			{
-				memcpy(this->bits, bits, imageSize * sizeof(uint8));
-			}
-			else if (init)
-			{
-				memset(this->bits, 0, imageSize * sizeof(uint8));
-			}
+			memset(this->bits, 0, imageSize * sizeof(uint8));
 		}
-
-		size = imageSize;
-
+		
 		return true;
 	}
 
@@ -479,6 +454,7 @@ _error:
 
 	void Bitmap::SetColor32(RGBA color /* = 0x00000000 */)
 	{
+		assert(bits != 0);
 		assert(biBitCount == 32);
 
 		uint8 r = (color & 0x000000ff);
@@ -491,8 +467,8 @@ _error:
 
 	void Bitmap::SetColor32(uint8 r, uint8 g, uint8 b, uint8 a)
 	{
-		assert(biBitCount == 32);
 		assert(bits != 0);
+		assert(biBitCount == 32);
 
 		int lineBytes = WIDTHBYTES(biBitCount * biWidth);
 
@@ -737,7 +713,12 @@ _error:
 
 	Bitmap* Bitmap::Clone(void) const
 	{
-		return Clone(0, 0, biWidth - 1, biHeight - 1);
+		assert(IsValid());
+
+		Bitmap* dst = new Bitmap(*this);
+		assert(dst != 0);
+
+		return dst;
 	}
 
 	Bitmap* Bitmap::Clone(uint x0, uint y0, uint x1, uint y1) const
@@ -788,7 +769,7 @@ _error:
 	{
 		if (bits != 0)
 		{
-			delete[] bits;
+			free(bits);
 		}
 
 		Initialize();
@@ -796,8 +777,6 @@ _error:
 
 	bool Bitmap::Load(const char* fileName, bool reverse /* = true */)
 	{
-		this->Clear();
-
 		return _LoadBitmap(*this, fileName, reverse);
 	}
 
@@ -820,12 +799,17 @@ _error:
 		}
 
 		uint8* bits = 0;
+
 		if (bm.bmBits == 0)//not DIB
 		{
 			int size = bm.bmHeight * bm.bmWidthBytes;
-			bits = new uint8[size];
+			bits = (uint8*)malloc(size);
 			if (bits == 0) return false;
 			GetBitmapBits(hBitmap, size, (void*)bits);
+		}
+		else
+		{
+			bits = (uint8*)bm.bmBits;
 		}
 
 		int bitCount = bm.bmPlanes * bm.bmBitsPixel;
@@ -855,16 +839,11 @@ _error:
 			bitCount = 32;
 		}
 
-		if (bits == 0)
-		{
-			return _SaveBitmap(fileName, (uint8*)bm.bmBits, bm.bmWidth, bm.bmHeight, bitCount, true);
-		}
-		else
-		{
-			bool ret = _SaveBitmap(fileName, bits, bm.bmWidth, bm.bmHeight, bitCount, true);
-			delete[] bits;
-			return ret;
-		}
+		bool ret = _SaveBitmap(fileName, bits, bm.bmWidth, bm.bmHeight, bitCount, true);
+
+		free(bits);
+
+		return ret;
 	}
 
 	bool Save2PPM(const Bitmap* bitmap, const char* fileName)

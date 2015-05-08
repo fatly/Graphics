@@ -9,6 +9,7 @@
 #include "AutoPtr.h"
 #include "BaseClass.h"
 #include "Misc.h"
+#include "Gaussion.h"
 #include "Convolve.h"
 #include "Morphology.h"
 #include "ImageProcess.h"

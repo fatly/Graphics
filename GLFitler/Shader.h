@@ -3,8 +3,9 @@
 
 namespace e
 {
-	extern const char * vexterShader;
-	extern const char * fragmentShader;
+	extern const char* g_vexterShader;
+
+	const char* CreateShaderString(int radius, float sigma);
 }
 
 #endif

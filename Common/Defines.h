@@ -27,6 +27,10 @@
 
 	typedef uint32 RGBA;
 
+#ifndef PI
+#define PI 3.141592654
+#endif
+
 #define RC(x) (x & 0x000000ff)
 #define GC(x) ((x & 0x0000ff00) >> 8)
 #define BC(x) ((x & 0x00ff0000) >> 16)
@@ -42,6 +46,10 @@
 
 #ifndef clamp
 #define clamp(x, a, b) max((a), min((x), (b)))
+#endif
+
+#ifndef ROUND
+#define ROUND(x) ((int)((x) + 0.5))
 #endif
 
 #ifndef	WIDTHBYTES

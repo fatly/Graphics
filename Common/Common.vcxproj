@@ -105,6 +105,7 @@
     <ClInclude Include="Convert.h" />
     <ClInclude Include="Convolve.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="Gaussion.h" />
     <ClInclude Include="ImageProcess.h" />
     <ClInclude Include="Misc.h" />
     <ClInclude Include="Morphology.h" />
@@ -114,6 +115,7 @@
   <ItemGroup>
     <ClCompile Include="Bitmap.cpp" />
     <ClCompile Include="BitmapGlyph.cpp" />
+    <ClCompile Include="Gaussion.cpp" />
     <ClCompile Include="ImageProcess.cpp" />
     <ClCompile Include="Object.cpp" />
   </ItemGroup>

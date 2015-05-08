@@ -31,8 +31,6 @@ namespace e
 		char* GetErrorString(GLuint object);
 		bool InitTexture(int width, int height);
 		bool SetupPixelFormat(HDC dc);
-		void MakeGauss(char** buffer, int size);
-		void GenFile(void);
 		void Cleanup(void);
 	private:
 		GLuint program;
