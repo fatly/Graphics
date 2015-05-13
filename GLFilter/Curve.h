@@ -1,0 +1,101 @@
+#ifndef __CORE_CURVE_H__
+#define __CORE_CURVE_H__
+
+namespace e
+{
+	class Vector2
+	{
+	public:
+		Vector2(void)
+		{
+			x = y = 0.0;
+		}
+
+		Vector2(double x, double y)
+		{
+			this->x = x;
+			this->y = y;
+		}
+
+		Vector2(const Vector2 & r)
+		{
+			this->x = r.x;
+			this->y = r.y;
+		}
+
+		const Vector2 & operator=(const Vector2 & r)
+		{
+			if (this != &r)
+			{
+				this->x = r.x;
+				this->y = r.y;
+			}
+
+			return *this;
+		}
+
+	public:
+		double x;
+		double y;
+	};
+
+	class Curve
+	{
+	public:
+		Curve(void);
+		virtual ~Curve(void);
+		void Initialize(void);
+		void SetPointCount(int pointCount);
+		void SetSampleCount(int sampleCount);
+		void InitPointAndSample(void);
+		void SetPoint(int index, double x, double y);
+		void SetPoints(int count, Vector2 * points);
+		void SetSamples(int count, double * samples);
+		void Reset(bool resetType);
+		void Calculate(void);
+		void Plot(int p1, int p2, int p3, int p4);
+		double GetValue(double value);
+		byte GetValue(int index);
+		void Cleanup(void);
+
+		const Curve & operator=(const Curve & r);
+
+	public:
+		int			pointCount;
+		Vector2*	points;
+		int			sampleCount;
+		double*		samples;
+		bool		identity;
+		byte*		tables;
+	};
+
+	typedef enum
+	{
+		CURVE_CHANNEL_C = 0,		/*< desc="Value" >*/
+		CURVE_CHANNEL_B = 1,		/*< desc="Blue"  >*/
+		CURVE_CHANNEL_G = 2,		/*< desc="Green" >*/
+		CURVE_CHANNEL_R = 3,		/*< desc="Red"   >*/
+		CURVE_CHANNEL_A = 4,		/*< desc="Alpha" >*/
+		CURVE_CHANNEL_RGB = 5		/*< desc="RGB", pdb-skip >*/
+	} CurveChannel;
+
+	class CurvesConfig
+	{
+	public:
+		CurvesConfig(void);
+		virtual ~CurvesConfig(void);
+		void Calculate(void);
+		void CreateSpline(int channel, int count, double * points);
+		void CreateSplineCruft(int channel, int count, uint8 * points);
+		void CurvesSpline(int channel, int count, uint8 * points);
+		void Reset(void);
+		void Cleanup(void);
+
+		const CurvesConfig & operator=(const CurvesConfig & r);
+	public:
+		int channel;
+		Curve* curves[5];
+	};
+}
+
+#endif
