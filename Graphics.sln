@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SoftGlow", "SoftGlow\SoftGl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLFilter", "GLFilter\GLFilter.vcxproj", "{C5233479-382D-43FA-BAA5-80B9F15C5C9E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Curve", "Curve\Curve.vcxproj", "{9D7112FA-78D6-49CE-959A-98A89F917DED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -45,6 +47,10 @@ Global
 		{C5233479-382D-43FA-BAA5-80B9F15C5C9E}.Debug|Win32.Build.0 = Debug|Win32
 		{C5233479-382D-43FA-BAA5-80B9F15C5C9E}.Release|Win32.ActiveCfg = Release|Win32
 		{C5233479-382D-43FA-BAA5-80B9F15C5C9E}.Release|Win32.Build.0 = Release|Win32
+		{9D7112FA-78D6-49CE-959A-98A89F917DED}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9D7112FA-78D6-49CE-959A-98A89F917DED}.Debug|Win32.Build.0 = Debug|Win32
+		{9D7112FA-78D6-49CE-959A-98A89F917DED}.Release|Win32.ActiveCfg = Release|Win32
+		{9D7112FA-78D6-49CE-959A-98A89F917DED}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

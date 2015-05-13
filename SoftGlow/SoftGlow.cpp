@@ -4,7 +4,6 @@
 
 #define SIGMOIDAL_BASE   2
 #define SIGMOIDAL_RANGE 20
-
 #define INT_MULT(a,b,t)  ((t) = (a) * (b) + 0x80, ((((t) >> 8) + (t)) >> 8))
 
 
