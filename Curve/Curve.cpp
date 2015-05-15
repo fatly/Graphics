@@ -1,221 +1,506 @@
-
-// Curve.cpp : 定义应用程序的类行为。
-//
-
 #include "stdafx.h"
-#include "afxwinappex.h"
-#include "afxdialogex.h"
 #include "Curve.h"
-#include "MainFrame.h"
-
-#include "CurveDoc.h"
-#include "CurveView.h"
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#endif
+#include <float.h>
 
 
-// CCurveApp
-
-BEGIN_MESSAGE_MAP(CCurveApp, CWinAppEx)
-	ON_COMMAND(ID_APP_ABOUT, &CCurveApp::OnAppAbout)
-	// 基于文件的标准文档命令
-	ON_COMMAND(ID_FILE_NEW, &CWinAppEx::OnFileNew)
-	ON_COMMAND(ID_FILE_OPEN, &CWinAppEx::OnFileOpen)
-	// 标准打印设置命令
-	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinAppEx::OnFilePrintSetup)
-END_MESSAGE_MAP()
-
-
-// CCurveApp 构造
-
-CCurveApp::CCurveApp()
+//////////////////////////////////////////////////////////////////////////
+//-----------------------------CurvesConfig------------------------------ 
+//////////////////////////////////////////////////////////////////////////
+CurvesConfig::CurvesConfig(int pointCount, int sampleCount)
 {
-	m_bHiColorIcons = TRUE;
-
-	// 支持重新启动管理器
-	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_ALL_ASPECTS;
-#ifdef _MANAGED
-	// 如果应用程序是利用公共语言运行时支持(/clr)构建的，则: 
-	//     1) 必须有此附加设置，“重新启动管理器”支持才能正常工作。
-	//     2) 在您的项目中，您必须按照生成顺序向 System.Windows.Forms 添加引用。
-	System::Windows::Forms::Application::SetUnhandledExceptionMode(System::Windows::Forms::UnhandledExceptionMode::ThrowException);
-#endif
-
-	// TODO:  将以下应用程序 ID 字符串替换为唯一的 ID 字符串；建议的字符串格式
-	//为 CompanyName.ProductName.SubProduct.VersionInformation
-	SetAppID(_T("Curve.AppID.NoVersion"));
-
-	// TODO:  在此处添加构造代码，
-	// 将所有重要的初始化放置在 InitInstance 中
-}
-
-// 唯一的一个 CCurveApp 对象
-
-CCurveApp theApp;
-
-
-// CCurveApp 初始化
-
-BOOL CCurveApp::InitInstance()
-{
-	// 如果一个运行在 Windows XP 上的应用程序清单指定要
-	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
-	//则需要 InitCommonControlsEx()。  否则，将无法创建窗口。
-	INITCOMMONCONTROLSEX InitCtrls;
-	InitCtrls.dwSize = sizeof(InitCtrls);
-	// 将它设置为包括所有要在应用程序中使用的
-	// 公共控件类。
-	InitCtrls.dwICC = ICC_WIN95_CLASSES;
-	InitCommonControlsEx(&InitCtrls);
-
-	CWinAppEx::InitInstance();
-
-
-	// 初始化 OLE 库
-	if (!AfxOleInit())
+	for (int i = 0; i < 5; i++)
 	{
-		AfxMessageBox(IDP_OLE_INIT_FAILED);
-		return FALSE;
+		curves[i] = new Curve(pointCount, sampleCount);
+		assert(curves[i] != 0);
 	}
 
-	AfxEnableControlContainer();
-
-	EnableTaskbarInteraction(FALSE);
-
-	// 使用 RichEdit 控件需要  AfxInitRichEdit2()	
-	// AfxInitRichEdit2();
-
-	// 标准初始化
-	// 如果未使用这些功能并希望减小
-	// 最终可执行文件的大小，则应移除下列
-	// 不需要的特定初始化例程
-	// 更改用于存储设置的注册表项
-	// TODO:  应适当修改该字符串，
-	// 例如修改为公司或组织名
-	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
-	LoadStdProfileSettings(4);  // 加载标准 INI 文件选项(包括 MRU)
-
-
-	InitContextMenuManager();
-
-	InitKeyboardManager();
-
-	InitTooltipManager();
-	CMFCToolTipInfo ttParams;
-	ttParams.m_bVislManagerTheme = TRUE;
-	theApp.GetTooltipManager()->SetTooltipParams(AFX_TOOLTIP_TYPE_ALL,
-		RUNTIME_CLASS(CMFCToolTipCtrl), &ttParams);
-
-	// 注册应用程序的文档模板。  文档模板
-	// 将用作文档、框架窗口和视图之间的连接
-	CSingleDocTemplate* pDocTemplate;
-	pDocTemplate = new CSingleDocTemplate(
-		IDR_MAINFRAME,
-		RUNTIME_CLASS(CCurveDoc),
-		RUNTIME_CLASS(CMainFrame),       // 主 SDI 框架窗口
-		RUNTIME_CLASS(CCurveView));
-	if (!pDocTemplate)
-		return FALSE;
-	AddDocTemplate(pDocTemplate);
-
-
-	// 分析标准 shell 命令、DDE、打开文件操作的命令行
-	CCommandLineInfo cmdInfo;
-	ParseCommandLine(cmdInfo);
-
-	// 启用“DDE 执行”
-	EnableShellOpen();
-	RegisterShellFileTypes(TRUE);
-
-
-	// 调度在命令行中指定的命令。  如果
-	// 用 /RegServer、/Register、/Unregserver 或 /Unregister 启动应用程序，则返回 FALSE。
-	if (!ProcessShellCommand(cmdInfo))
-		return FALSE;
-
-	// 唯一的一个窗口已初始化，因此显示它并对其进行更新
-	m_pMainWnd->ShowWindow(SW_SHOW);
-	m_pMainWnd->UpdateWindow();
-	// 仅当具有后缀时才调用 DragAcceptFiles
-	//  在 SDI 应用程序中，这应在 ProcessShellCommand 之后发生
-	// 启用拖/放
-	m_pMainWnd->DragAcceptFiles();
-	return TRUE;
+	channel = CURVE_CHANNEL_C;
 }
 
-int CCurveApp::ExitInstance()
+CurvesConfig::~CurvesConfig(void)
 {
-	//TODO:  处理可能已添加的附加资源
-	AfxOleTerm(FALSE);
-
-	return CWinAppEx::ExitInstance();
+	for (int i = 0; i < 5; i++)
+	{
+		if (curves[i] != 0)
+		{
+			delete curves[i];
+			curves[i] = 0;
+		}
+	}
 }
 
-// CCurveApp 消息处理程序
-
-
-// 用于应用程序“关于”菜单项的 CAboutDlg 对话框
-
-class CAboutDlg : public CDialogEx
+void CurvesConfig::Calculate(void)
 {
-public:
-	CAboutDlg();
-
-// 对话框数据
-	enum { IDD = IDD_ABOUTBOX };
-
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
-
-// 实现
-protected:
-	DECLARE_MESSAGE_MAP()
-};
-
-CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
-{
+	for (int i = 0; i < 5; i++)
+	{
+		curves[i]->Calculate();
+	}
 }
 
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+void CurvesConfig::CreateSpline(CurveChannel channel, int count, double* points)
 {
-	CDialogEx::DoDataExchange(pDX);
+	assert(channel >= CURVE_CHANNEL_C && channel <= CURVE_CHANNEL_A);
+	assert(count >= 2 && count <= 1024);
+
+	Curve* curve = GetCurve(channel);
+
+	curve->SetPointCount(count);
+
+	for (int i = 0; i < count; i++)
+	{
+		curve->SetPoint(i, points[2 * i + 0], points[2 * i + 1]);
+	}
+
+	curve->Calculate();
 }
 
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-END_MESSAGE_MAP()
-
-// 用于运行对话框的应用程序命令
-void CCurveApp::OnAppAbout()
+void CurvesConfig::Reset(void)
 {
-	CAboutDlg aboutDlg;
-	aboutDlg.DoModal();
+	for (int i = 0; i < 5; i++)
+	{
+		if (curves[i] != 0)
+		{
+			curves[i]->Reset();
+		}
+	}
+
+	channel = CURVE_CHANNEL_C;
 }
 
-// CCurveApp 自定义加载/保存方法
-
-void CCurveApp::PreLoadState()
+void CurvesConfig::SetSelectCurve(const int channel)
 {
-	BOOL bNameValid;
-	CString strName;
-	bNameValid = strName.LoadString(IDS_EDIT_MENU);
-	ASSERT(bNameValid);
-	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EDIT);
-	bNameValid = strName.LoadString(IDS_EXPLORER);
-	ASSERT(bNameValid);
-	GetContextMenuManager()->AddMenu(strName, IDR_POPUP_EXPLORER);
+	assert(channel >= CURVE_CHANNEL_C && channel <= CURVE_CHANNEL_A);
+	this->channel = channel;
 }
 
-void CCurveApp::LoadCustomState()
+Curve* CurvesConfig::GetCurve(const int channel) const
 {
+	assert(channel >= CURVE_CHANNEL_C && channel <= CURVE_CHANNEL_A);
+	return curves[channel];
 }
 
-void CCurveApp::SaveCustomState()
+Curve* CurvesConfig::GetSelectCurve(void) const
 {
+	return curves[channel];
 }
 
-// CCurveApp 消息处理程序
+int CurvesConfig::GetSelectChannel(void) const
+{
+	return channel;
+}
+
+const CurvesConfig & CurvesConfig::operator=(const CurvesConfig & r)
+{
+	if (this != &r)
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			*curves[i] = *(r.curves[i]);
+		}
+	}
+
+	return *this;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//------------------------------curves-----------------------------------
+//////////////////////////////////////////////////////////////////////////
+
+Curve::Curve()
+{
+	pointCount = 0;
+	points = 0;
+	sampleCount = 0;
+	samples = 0;
+	identity = false;
+	tables = 0;
+}
+
+Curve::Curve(int pointCount, int sampleCount)
+{
+	this->pointCount = 0;
+	this->points = 0;
+	this->sampleCount = 0;
+	this->samples = 0;
+	this->identity = false;
+	this->tables = 0;
+
+	SetPointCount(pointCount);
+
+	SetSampleCount(sampleCount);
+}
 
 
+Curve::~Curve()
+{
+	if (points != 0)
+	{
+		free(points);
+		points = 0;
+	}
 
+	if (samples != 0)
+	{
+		free(samples);
+		samples = 0;
+	}
+
+	if (tables != 0)
+	{
+		free(tables);
+		tables = 0;
+	}
+}
+
+void Curve::SetPointCount(int pointCount)
+{
+	assert(pointCount >= 2 && pointCount <= 1024);
+
+	if (this->pointCount != pointCount)
+	{
+		this->pointCount = pointCount;
+
+		points = (double*)realloc(points, sizeof(double) * 2 * pointCount);
+		assert(points);
+
+		points[0 * 2 + 0] = 0.0;
+		points[0 * 2 + 1] = 0.0;
+
+		for (int i = 1; i < pointCount - 1; i++)
+		{
+			points[i * 2 + 0] = -1.0;
+			points[i * 2 + 1] = -1.0;
+		}
+
+		points[(pointCount - 1) * 2 + 0] = 1.0;
+		points[(pointCount - 1) * 2 + 1] = 1.0;
+
+		identity = true;
+	}
+}
+
+void Curve::SetSampleCount(int sampleCount)
+{
+	assert(sampleCount >= 256 && sampleCount < 4096);
+
+	if (this->sampleCount != sampleCount)
+	{
+		this->sampleCount = sampleCount;
+
+		samples = (double*)realloc(samples, sampleCount * sizeof(double));
+		assert(samples);
+
+		for (int i = 0; i < sampleCount; i++)
+		{
+			samples[i] = (double)i / (double)(sampleCount - 1);
+		}
+
+		tables = (byte*)realloc(tables, sampleCount * sizeof(byte));
+		assert(tables);
+
+		for (int i = 0; i < sampleCount; i++)
+		{
+			tables[i] = (byte)ROUND(samples[i] * 255);
+		}
+
+		identity = true;
+	}
+}
+
+void Curve::SetPoint(int index, double x, double y)
+{
+	assert(index >= 0 && index < pointCount);
+	assert(x == -1.0 || x >= 0.0 && x <= 1.0);
+	assert(y == -1.0 || y >= 0.0 && y <= 1.0);
+
+	points[index * 2 + 0] = x;
+	points[index * 2 + 1] = y;
+}
+
+void Curve::SetSample(int index, double value)
+{
+	assert(index >= 0 && index < sampleCount);
+	assert(value >= 0.0 && value <= 1.0);
+	samples[index] = value;
+}
+
+void Curve::Reset(void)
+{
+	for (int i = 0; i < sampleCount; i++)
+	{
+		samples[i] = (double)i / (double)(sampleCount - 1);
+		tables[i] = (byte)ROUND(samples[i] * 255);
+	}
+
+	SetPoint(0, 0.0, 0.0);
+
+	for (int i = 1; i < pointCount - 1; i++)
+	{
+		SetPoint(i, -1.0, -1.0);
+	}
+
+	SetPoint(pointCount - 1, 1.0, 1.0);
+
+	identity = true;
+}
+
+bool Curve::IsIdentity(void) const
+{
+	return identity;
+}
+
+void Curve::Calculate(void)
+{
+	int p1, p2, p3, p4;
+	int count;
+	double x, y;
+
+	int* p = (int*)malloc(this->pointCount * sizeof(int));
+	assert(p);
+
+	count = 0;
+	for (int i = 0; i < pointCount; i++)
+	{
+		GetPoint(i, x, y);
+
+		if (x >= 0.0)
+		{
+			p[count++] = i;
+		}
+	}
+
+	if (count != 0)
+	{
+		GetPoint(p[0], x, y);
+		int boundary = ROUND(x * (double)(sampleCount - 1));
+
+		for (int i = 0; i < boundary; i++)
+		{
+			samples[i] = y;
+		}
+
+		GetPoint(p[count - 1], x, y);
+		boundary = ROUND(x * (double)(sampleCount - 1));
+
+		for (int i = boundary; i < sampleCount; i++)
+		{
+			samples[i] = y;
+		}
+
+		for (int i = 0; i < count - 1; i++)
+		{
+			p1 = p[max(i - 1, 0)];
+			p2 = p[i + 0];
+			p3 = p[i + 1];
+			p4 = p[min(i + 2, count - 1)];
+
+			Plot(p1, p2, p3, p4);
+		}
+
+		for (int i = 0; i < count; i++)
+		{
+			GetPoint(p[i], x, y);
+
+			samples[ROUND(x * (double)(sampleCount - 1))] = y;
+		}
+	}
+
+	for (int i = 0; i < sampleCount; i++)
+	{
+		this->tables[i] = (byte)(ROUND(samples[i] * 255));
+	}
+
+	free(p);
+
+	this->identity = false;
+}
+
+void Curve::Plot(int p1, int p2, int p3, int p4)
+{
+	double y1, y2, slope;
+	double x0 = points[p2 * 2 + 0];
+	double y0 = points[p2 * 2 + 1];
+	double x3 = points[p3 * 2 + 0];
+	double y3 = points[p3 * 2 + 1];
+
+	/*
+	* the x values of the inner control points are fixed at
+	* x1 = 2/3*x0 + 1/3*x3   and  x2 = 1/3*x0 + 2/3*x3
+	* this ensures that the x values increase linearily with the
+	* parameter t and enables us to skip the calculation of the x
+	* values altogehter - just calculate y(t) evenly spaced.
+	*/
+
+	double dx = x3 - x0;
+	double dy = y3 - y0;
+
+	if (dx <= 0) return;
+
+	if (p1 == p2 && p3 == p4)
+	{
+		/* No information about the neighbors,
+		* calculate y1 and y2 to get a straight line
+		*/
+		y1 = y0 + dy / 3.0;
+		y2 = y0 + dy * 2.0 / 3.0;
+	}
+	else if (p1 == p2 && p3 != p4)
+	{
+		/* only the right neighbor is available. Make the tangent at the
+		* right endpoint parallel to the line between the left endpoint
+		* and the right neighbor. Then point the tangent at the left towards
+		* the control handle of the right tangent, to ensure that the curve
+		* does not have an inflection point.
+		*/
+		slope = (points[p4 * 2 + 1] - y0) / (points[p4 * 2 + 0] - x0);
+
+		y2 = y3 - slope * dx / 3.0;
+		y1 = y0 + (y2 - y0) / 2.0;
+	}
+	else if (p1 != p2 && p3 == p4)
+	{
+		/* see previous case */
+		slope = (y3 - points[p1 * 2 + 1]) / (x3 - points[p1 * 2 + 0]);
+
+		y1 = y0 + slope * dx / 3.0;
+		y2 = y3 + (y1 - y3) / 2.0;
+	}
+	else /* (p1 != p2 && p3 != p4) */
+	{
+		/* Both neighbors are available. Make the tangents at the endpoints
+		* parallel to the line between the opposite endpoint and the adjacent
+		* neighbor.
+		*/
+		slope = (y3 - points[p1 * 2 + 1]) / (x3 - points[p1 * 2 + 0]);
+
+		y1 = y0 + slope * dx / 3.0;
+
+		slope = (points[p4 * 2 + 1] - y0) / (points[p4 * 2 + 0] - x0);
+
+		y2 = y3 - slope * dx / 3.0;
+	}
+
+	/*
+	* finally calculate the y(t) values for the given bezier values. We can
+	* use homogenously distributed values for t, since x(t) increases linearily.
+	*/
+	for (int i = 0; i <= ROUND(dx * (double)(sampleCount - 1)); i++)
+	{
+		double t = i / dx / (double)(sampleCount - 1);
+		double y = y0 * (1 - t) * (1 - t) * (1 - t) +
+			3 * y1 * (1 - t) * (1 - t) * t +
+			3 * y2 * (1 - t) * t * t +
+			y3 * t * t * t;
+
+		int index = i + ROUND(x0 * (double)(sampleCount - 1));
+
+		if (index < sampleCount)
+		{
+			samples[index] = clamp(y, 0.0, 1.0);
+		}
+	}
+}
+
+double Curve::GetSample(double value)
+{
+	if (this->identity)
+	{
+		if (_finite(value))
+		{
+			return clamp(value, 0.0, 1.0);
+		}
+
+		return 0.0;
+	}
+
+	if (value > 0.0 && value < 1.0)
+	{
+		value = value * (sampleCount - 1);
+
+		int index = (int)value;
+
+		double f = value - index;
+
+		return (1.0 - f) * samples[index] + f * samples[index + 1];
+	}
+	else if (value >= 1.0)
+	{
+		return samples[sampleCount - 1];
+	}
+	else
+	{
+		return samples[0];
+	}
+}
+
+byte Curve::GetSample(int index)
+{
+	assert(index >= 0 && index < sampleCount);
+	return tables[index];
+}
+
+void Curve::CopySample(byte* samples, int size)
+{
+	assert(size <= sampleCount);
+	memcpy(samples, tables, size);
+}
+
+void Curve::GetPoint(const int index, int& x, int& y)
+{
+	assert(index >= 0 && index < pointCount);
+	x = ROUND(points[index * 2 + 0] * 255);
+	y = ROUND(points[index * 2 + 1] * 255);
+}
+
+void Curve::GetPoint(const int index, double& x, double& y)
+{
+	assert(index >= 0 && index < pointCount);
+	x = points[index * 2 + 0];
+	y = points[index * 2 + 1];
+}
+
+int Curve::GetPointCount(void) const
+{
+	return pointCount;
+}
+
+int Curve::GetSampleCount(void) const
+{
+	return sampleCount;
+}
+
+const Curve & Curve::operator=(const Curve & r)
+{
+	if (this != &r)
+	{
+		this->pointCount = r.pointCount;
+		this->points = (double*)realloc(this->points, sizeof(double) * 2 * this->pointCount);
+		assert(this->points);
+
+		for (int i = 0; i < pointCount; i++)
+		{
+			this->points[i] = r.points[i];
+		}
+
+		this->sampleCount = r.sampleCount;
+		this->samples = (double*)realloc(this->samples, sizeof(double)* this->sampleCount);
+		assert(this->samples);
+
+		for (int i = 0; i < sampleCount; i++)
+		{
+			this->samples[i] = r.samples[i];
+		}
+
+		this->tables = (byte*)realloc(this->tables, sizeof(byte) * this->sampleCount);
+		assert(this->tables);
+
+		for (int i = 0; i < sampleCount; i++)
+		{
+			this->tables[i] = r.tables[i];
+		}
+
+		this->identity = r.identity;
+	}
+
+	return *this;
+}

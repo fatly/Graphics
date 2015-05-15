@@ -13,20 +13,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\VS">
-      <UniqueIdentifier>{85b78b7f-f7ba-47c1-936e-91069068cf1b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\VS">
-      <UniqueIdentifier>{96b69795-e1bd-4757-b077-0f98411a4b9f}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Curve.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -45,29 +36,17 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ClassView.h">
-      <Filter>头文件\VS</Filter>
+    <ClInclude Include="CurveApp.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="FileView.h">
-      <Filter>头文件\VS</Filter>
+    <ClInclude Include="Curve.h">
+      <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="OutputWnd.h">
-      <Filter>头文件\VS</Filter>
-    </ClInclude>
-    <ClInclude Include="PropertiesWnd.h">
-      <Filter>头文件\VS</Filter>
-    </ClInclude>
-    <ClInclude Include="ViewTree.h">
-      <Filter>头文件\VS</Filter>
-    </ClInclude>
-    <ClInclude Include="CurveWnd.h">
+    <ClInclude Include="CurveCtrl.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Curve.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -80,22 +59,13 @@
     <ClCompile Include="CurveView.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ClassView.cpp">
-      <Filter>源文件\VS</Filter>
+    <ClCompile Include="CurveApp.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="FileView.cpp">
-      <Filter>源文件\VS</Filter>
+    <ClCompile Include="Curve.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="OutputWnd.cpp">
-      <Filter>源文件\VS</Filter>
-    </ClCompile>
-    <ClCompile Include="PropertiesWnd.cpp">
-      <Filter>源文件\VS</Filter>
-    </ClCompile>
-    <ClCompile Include="ViewTree.cpp">
-      <Filter>源文件\VS</Filter>
-    </ClCompile>
-    <ClCompile Include="CurveWnd.cpp">
+    <ClCompile Include="CurveCtrl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

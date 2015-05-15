@@ -49,8 +49,8 @@ namespace e
 		void SetSampleCount(int sampleCount);
 		void InitPointAndSample(void);
 		void SetPoint(int index, double x, double y);
-		void SetPoints(int count, Vector2 * points);
-		void SetSamples(int count, double * samples);
+		void SetPoints(int count, Vector2* points);
+		void SetSamples(int count, double* samples);
 		void Reset(bool resetType);
 		void Calculate(void);
 		void Plot(int p1, int p2, int p3, int p4);

@@ -51,4 +51,10 @@
 #endif
 #endif
 
+#include "../Common/Common.h"
 
+#ifdef _DEBUG
+#pragma comment(lib, "CommonD.lib")
+#else
+#pragma comment(lib, "Common.lib")
+#endif

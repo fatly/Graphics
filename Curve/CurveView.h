@@ -3,7 +3,7 @@
 //
 
 #pragma once
-
+#include "CurveCtrl.h"
 
 class CCurveView : public CView
 {
@@ -34,15 +34,20 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
-
+	void UpdateView(void);
 protected:
-
+	CCurveCtrl m_ctrlCurve;
 // 生成的消息映射函数
 protected:
 	afx_msg void OnFilePrintPreview();
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnCurveChange(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnFileOpen();
 };
 
 #ifndef _DEBUG  // CurveView.cpp 中的调试版本

@@ -6,7 +6,7 @@
 // SHARED_HANDLERS 可以在实现预览、缩略图和搜索筛选器句柄的
 // ATL 项目中进行定义，并允许与该项目共享文档代码。
 #ifndef SHARED_HANDLERS
-#include "Curve.h"
+#include "CurveApp.h"
 #endif
 
 #include "CurveDoc.h"

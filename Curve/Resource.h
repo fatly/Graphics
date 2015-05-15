@@ -95,3 +95,6 @@
 #define _APS_NEXT_COMMAND_VALUE		32771
 #endif
 #endif
+
+//user message
+#define UM_CURVE_CHANGE				(WM_USER + 1)

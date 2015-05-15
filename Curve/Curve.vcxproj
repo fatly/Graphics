@@ -109,35 +109,27 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClassView.h" />
     <ClInclude Include="Curve.h" />
+    <ClInclude Include="CurveApp.h" />
     <ClInclude Include="CurveDoc.h" />
     <ClInclude Include="CurveView.h" />
-    <ClInclude Include="CurveWnd.h" />
-    <ClInclude Include="FileView.h" />
+    <ClInclude Include="CurveCtrl.h" />
     <ClInclude Include="MainFrame.h" />
-    <ClInclude Include="OutputWnd.h" />
-    <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="ViewTree.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="Curve.cpp" />
+    <ClCompile Include="CurveApp.cpp" />
     <ClCompile Include="CurveDoc.cpp" />
     <ClCompile Include="CurveView.cpp" />
-    <ClCompile Include="CurveWnd.cpp" />
-    <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="CurveCtrl.cpp" />
     <ClCompile Include="MainFrame.cpp" />
-    <ClCompile Include="OutputWnd.cpp" />
-    <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="ViewTree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Curve.reg" />

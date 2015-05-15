@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\Graphics.vcxproj", "{CD056680-3D4F-4C47-B00F-556C8FA9EAB5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E227B177-91FA-4F02-8666-2AE195744E95} = {E227B177-91FA-4F02-8666-2AE195744E95}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HSVFilter", "HSVFilter\HSVFilter.vcxproj", "{B0C1D9A5-2658-4E74-9011-8C8B14968337}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -20,6 +23,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLFilter", "GLFilter\GLFilter.vcxproj", "{C5233479-382D-43FA-BAA5-80B9F15C5C9E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Curve", "Curve\Curve.vcxproj", "{9D7112FA-78D6-49CE-959A-98A89F917DED}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E227B177-91FA-4F02-8666-2AE195744E95} = {E227B177-91FA-4F02-8666-2AE195744E95}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

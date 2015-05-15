@@ -27,6 +27,14 @@
 
 	typedef uint32 RGBA;
 
+// #ifndef MAXINT
+// #define MAXINT 0x7fffffff
+// #endif
+// 
+// #ifndef MININT
+// #define MININT 0xffffffff
+// #endif
+
 #ifndef PI
 #define PI 3.141592654
 #endif
@@ -49,11 +57,15 @@
 #endif
 
 #ifndef ROUND
-#define ROUND(x) ((int)((x) + 0.5))
+#define ROUND(x) ((int)((x) + ((x)>0?0.5:-0.5)))
 #endif
 
 #ifndef	WIDTHBYTES
 #define WIDTHBYTES(bits) (((bits) + 31) / 32 * 4)
+#endif
+
+#ifndef SAFE_FREE
+#define SAFE_FREE(x) if ((x) != 0){free(x); (x) = 0;}
 #endif
 
 #ifndef SAFE_DELETE
