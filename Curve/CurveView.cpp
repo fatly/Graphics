@@ -188,13 +188,15 @@ void CCurveView::OnSize(UINT nType, int cx, int cy)
 	CView::OnSize(nType, cx, cy);
 
 	// TODO:  在此处添加消息处理程序代码
-	CRect rect;
-	m_ctrlCurves.GetWindowRect(&rect);
+	CRect rect, rc;
+	GetClientRect(&rect);
+	ClientToScreen(&rect);
+	m_ctrlCurves.GetWindowRect(&rc);
 
-	int w = rect.Width();
-	int h = rect.Height();
-	int x = cx - w;
-	int y = 1;
+	int w = rc.Width();
+	int h = rc.Height();
+	int x = rect.right - w;
+	int y = rect.top + 1;
 
 	m_ctrlCurves.SetWindowPos(NULL, x, y, w, h, SWP_SHOWWINDOW);
 }
