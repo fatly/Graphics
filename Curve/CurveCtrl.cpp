@@ -258,8 +258,6 @@ void CCurveCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	m_bMouseDown = FALSE;
 	m_nSelectIndex = -1;
 
-	UpdateView();
-
 	ReleaseCapture();
 
 	CWnd::OnLButtonUp(nFlags, point);
