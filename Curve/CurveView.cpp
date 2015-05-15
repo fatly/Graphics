@@ -32,6 +32,7 @@ BEGIN_MESSAGE_MAP(CCurveView, CView)
 	ON_WM_CREATE()
 	ON_WM_SIZE()
 	ON_COMMAND(ID_FILE_OPEN, &CCurveView::OnFileOpen)
+	ON_COMMAND(ID_FILE_NEW, &CCurveView::OnFileNew)
 END_MESSAGE_MAP()
 
 // CCurveView 构造/析构
@@ -65,7 +66,7 @@ void CCurveView::OnDraw(CDC* /*pDC*/)
 	// TODO:  在此处为本机数据添加绘制代码
 	UpdateView();
 
-	m_ctrlCurve.OnDraw(NULL);
+	m_ctrlCurves.OnDraw(NULL);
 }
 
 
@@ -149,12 +150,27 @@ int CCurveView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	int y1 = y0 + h;
 
 	DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_BORDER;
-	if (!m_ctrlCurve.Create(NULL
-		, TEXT("Curve Config")
+// 	if (!m_ctrlCurves.Create(NULL
+// 		, TEXT("Curves Config")
+// 		, dwStyle
+// 		, CRect(x0, y0, x1, y1)
+// 		, this
+// 		, ID++
+// 		, NULL))
+// 	{
+// 		return -1;
+// 	}
+
+	dwStyle = WS_POPUP | WS_VISIBLE | WS_BORDER | WS_SYSMENU | WS_CAPTION;
+	DWORD dwExStyle = WS_EX_TOPMOST;
+
+	if (!m_ctrlCurves.CreateEx(dwExStyle
+		, AfxRegisterWndClass(0)
+		, TEXT("Curves Config")
 		, dwStyle
 		, CRect(x0, y0, x1, y1)
 		, this
-		, ID++
+		, NULL
 		, NULL))
 	{
 		return -1;
@@ -162,8 +178,7 @@ int CCurveView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CRect rect(x0, y0, x1, y1);
 	AdjustWindowRect(&rect, dwStyle, FALSE);
-	m_ctrlCurve.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_SHOWWINDOW);
-	m_ctrlCurve.ShowWindow(SW_SHOW);
+	m_ctrlCurves.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_SHOWWINDOW);
 
 	return 0;
 }
@@ -174,14 +189,14 @@ void CCurveView::OnSize(UINT nType, int cx, int cy)
 
 	// TODO:  在此处添加消息处理程序代码
 	CRect rect;
-	m_ctrlCurve.GetWindowRect(&rect);
+	m_ctrlCurves.GetWindowRect(&rect);
 
 	int w = rect.Width();
 	int h = rect.Height();
 	int x = cx - w;
 	int y = 1;
 
-	m_ctrlCurve.SetWindowPos(NULL, x, y, w, h, SWP_SHOWWINDOW);
+	m_ctrlCurves.SetWindowPos(NULL, x, y, w, h, SWP_SHOWWINDOW);
 }
 
 LRESULT CCurveView::OnCurveChange(WPARAM wParam, LPARAM lParam)
@@ -211,15 +226,54 @@ void CCurveView::UpdateView(void)
 void CCurveView::OnFileOpen()
 {
 	// TODO:  在此添加命令处理程序代码
-	int count = 17;
+	int count = 9;
 	double* points = new double[count * 2];
-	int channel = m_ctrlCurve.GetSelectChannel();
-	m_ctrlCurve.ExportPoint(channel, points, count);
+	int channel = m_ctrlCurves.GetSelectChannel();
+	m_ctrlCurves.ExportPoint(channel, points, count);
 
 	TCHAR text[256] = { 0 };
 	for (int i = 0; i < count; i++)
 	{
-		_stprintf_s(text, TEXT("[%02d] x = %lf, y = %lf\n"), i, points[i * 2 + 0], points[i * 2 + 1]);
+		_stprintf_s(text, TEXT("%lf, %lf,\n"), points[i * 2 + 0], points[i * 2 + 1]);
 		OutputDebugString(text);
+	}
+
+	delete[] points;
+}
+
+
+void CCurveView::OnFileNew()
+{
+	// TODO:  在此添加命令处理程序代码
+	HWND hWnd = m_ctrlCurves.GetSafeHwnd();
+
+	if (hWnd == NULL)
+	{
+		int w = 255;
+		int h = 255;
+		int x0 = 100;
+		int y0 = 100;
+		int x1 = x0 + w;
+		int y1 = y0 + h;
+
+		DWORD dwStyle = WS_POPUP | WS_VISIBLE | WS_BORDER | WS_SYSMENU | WS_CAPTION;
+		DWORD dwExStyle = WS_EX_TOPMOST;
+
+		if (!m_ctrlCurves.CreateEx(dwExStyle
+			, AfxRegisterWndClass(0)
+			, TEXT("Curves Config")
+			, dwStyle
+			, CRect(x0, y0, x1, y1)
+			, this
+			, NULL
+			, NULL))
+		{
+			return;
+		}
+
+		CRect rect(x0, y0, x1, y1);
+		AdjustWindowRect(&rect, dwStyle, FALSE);
+		m_ctrlCurves.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_SHOWWINDOW);
+		m_ctrlCurves.OnDraw(NULL);
 	}
 }

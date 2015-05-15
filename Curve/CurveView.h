@@ -36,7 +36,7 @@ public:
 #endif
 	void UpdateView(void);
 protected:
-	CCurveCtrl m_ctrlCurve;
+	CCurveCtrl m_ctrlCurves;
 // 生成的消息映射函数
 protected:
 	afx_msg void OnFilePrintPreview();
@@ -48,6 +48,7 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnCurveChange(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnFileOpen();
+	afx_msg void OnFileNew();
 };
 
 #ifndef _DEBUG  // CurveView.cpp 中的调试版本

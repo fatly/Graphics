@@ -26,15 +26,24 @@ CCurveCtrl::CCurveCtrl()
 
 	//test data
 	double red_pts[] = {
-		0.000000, 0.007843,
-		0.121569, 0.192157,
-		0.247059, 0.372549,
-		0.372549, 0.529412,
-		0.498039, 0.666667,
-		0.623529, 0.784314,
-		0.749020, 0.874510,
-		0.874510, 0.945098,
-		1.000000, 0.996078,
+// 		0.000000, 0.007843,
+// 		0.121569, 0.192157,
+// 		0.247059, 0.372549,
+// 		0.372549, 0.529412,
+// 		0.498039, 0.666667,
+// 		0.623529, 0.784314,
+// 		0.749020, 0.874510,
+// 		0.874510, 0.945098,
+// 		1.000000, 0.996078,
+		0.000000, 0.000000,
+		0.125000, 0.015369,
+		0.250000, 0.038633,
+		0.375000, 0.077683,
+		0.500000, 0.140415,
+		0.625000, 0.234719,
+		0.750000, 0.393833,
+		0.875000, 0.666963,
+		1.000000, 1.000000,
 	};
 	double green_pts[] = {
 		0.000000, 0.007843,
@@ -450,7 +459,8 @@ void CCurveCtrl::ExportPoint(const int channel, double* points, const int count)
 	assert(channel >= 0 && channel <= 4);
 	assert(count >= 2);
 	Curve* curve = m_pCurveConfig->GetCurve(channel);
-	int dx = curve->GetSampleCount() / (count - 1);
+	int sampleCount = curve->GetSampleCount();
+	int dx = sampleCount / (count - 1);
 
 	points[0] = 0.0;
 	points[1] = curve->GetSample(0.0);
@@ -458,10 +468,8 @@ void CCurveCtrl::ExportPoint(const int channel, double* points, const int count)
 	for (int i = 1; i < count-1; i++)
 	{
 		int x = i * dx;
-		int y = curve->GetSample(x);
-
-		points[i * 2 + 0] = (double)x / curve->GetSampleCount();
-		points[i * 2 + 1] = curve->GetSample(points[i * 2 + 0]);
+		points[i * 2 + 0] = (double)x / sampleCount;
+		points[i * 2 + 1] = curve->GetSample(points[i * 2]);
 	}
 
 	int i = count - 1;
