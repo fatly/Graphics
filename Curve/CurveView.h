@@ -35,8 +35,14 @@ public:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 	void UpdateView(void);
+	void AttachBitmap(CBitmap* pBitmap, const Bitmap* bitmap);
+	void UpdateBitmap(void);
 protected:
 	CCurveCtrl m_ctrlCurves;
+	CBitmap*   m_pSrcBitmap;
+	CBitmap*   m_pDstBitmap;
+	BOOL	   m_bLoadBitmap;
+	byte*	   m_pCurveSamples[5];
 // 生成的消息映射函数
 protected:
 	afx_msg void OnFilePrintPreview();
@@ -47,8 +53,9 @@ public:
 	afx_msg int  OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnCurveChange(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnFileOpen();
+	afx_msg LRESULT OnCurveReset(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnFileNew();
+	afx_msg void OnFileOpen();
 };
 
 #ifndef _DEBUG  // CurveView.cpp 中的调试版本

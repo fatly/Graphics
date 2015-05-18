@@ -4,7 +4,7 @@
 
 
 #pragma once
-
+using namespace e;
 
 class CCurveDoc : public CDocument
 {
@@ -34,9 +34,20 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
+	BOOL OpenFile(const CString & fileName);
 
+	void SetBitmap(Bitmap* bitmap)
+	{
+		SAFE_DELETE(m_pBitmap);
+		m_pBitmap = bitmap;
+	}
+
+	Bitmap* GetBitmap(void) const
+	{
+		return m_pBitmap;
+	}
 protected:
-
+	Bitmap* m_pBitmap;
 // 生成的消息映射函数
 protected:
 	DECLARE_MESSAGE_MAP()

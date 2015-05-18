@@ -23,46 +23,6 @@ CCurveCtrl::CCurveCtrl()
 	m_nSelectIndex = -1;
 	m_pCurveConfig = new CurvesConfig(m_nPointCount, m_nSampleCount);
 	assert(m_pCurveConfig);
-
-	//test data
-	double red_pts[] = {
-		0.000000, 0.007843,
-		0.121569, 0.192157,
-		0.247059, 0.372549,
-		0.372549, 0.529412,
-		0.498039, 0.666667,
-		0.623529, 0.784314,
-		0.749020, 0.874510,
-		0.874510, 0.945098,
-		1.000000, 0.996078,
-	};
-	double green_pts[] = {
-		0.000000, 0.007843,
-		0.121569, 0.176471,
-		0.247059, 0.345098,
-		0.372549, 0.498039,
-		0.498039, 0.635294,
-		0.623529, 0.749020,
-		0.749020, 0.850980,
-		0.874510, 0.933333,
-		1.000000, 0.996078,
-	};
-	double blue_pts[] = {
-		0.000000, 0.007843,
-		0.121569, 0.164706,
-		0.247059, 0.329412,
-		0.372549, 0.482353,
-		0.498039, 0.611765,
-		0.623529, 0.733333,
-		0.749020, 0.835294,
-		0.874510, 0.921569,
-		1.000000, 0.996078,
-	};
-
-	m_pCurveConfig->CreateSpline(CURVE_CHANNEL_R, 9, red_pts);
-	m_pCurveConfig->CreateSpline(CURVE_CHANNEL_B, 9, blue_pts);
-	m_pCurveConfig->CreateSpline(CURVE_CHANNEL_G, 9, green_pts);
-	m_pCurveConfig->SetSelectCurve(CURVE_CHANNEL_R);
 }
 
 CCurveCtrl::~CCurveCtrl()
@@ -77,10 +37,9 @@ BEGIN_MESSAGE_MAP(CCurveCtrl, CWnd)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_RBUTTONUP()
 	ON_CBN_SELCHANGE(IDC_COMBO_CHANNELS, &OnSelChangeChannels)
 	ON_BN_CLICKED(IDC_BUTTON_RESET, &OnClickReset)
+	ON_WM_RBUTTONUP()
 END_MESSAGE_MAP()
 
 
@@ -192,7 +151,7 @@ void CCurveCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	SetCapture();
 
-	NotifyOwner();
+	NotifyOwner(UM_CURVE_CHANGE);
 
 	CWnd::OnLButtonDown(nFlags, point);
 }
@@ -245,7 +204,7 @@ void CCurveCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 		UpdateView();
 
-		NotifyOwner();
+		NotifyOwner(UM_CURVE_CHANGE);
 	}
 
 	CWnd::OnMouseMove(nFlags, point);
@@ -263,39 +222,64 @@ void CCurveCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	CWnd::OnLButtonUp(nFlags, point);
 }
 
-void CCurveCtrl::OnRButtonDown(UINT nFlags, CPoint point)
-{
-	// TODO:  在此添加消息处理程序代码和/或调用默认值
-	static int channel = m_pCurveConfig->GetSelectChannel();
-
-	channel += 1;
-
-	if (channel > CURVE_CHANNEL_A)
-	{
-		channel = CURVE_CHANNEL_C;
-	}
-
-	m_pCurveConfig->SetSelectCurve(channel);
-
-	UpdateView();
-
-	TRACE("OnRButtonDown() channel = %d\n", channel);
-
-	CWnd::OnRButtonDown(nFlags, point);
-}
-
 void CCurveCtrl::OnRButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO:  在此添加消息处理程序代码和/或调用默认值
+	//test data
+	double red_pts[] = {
+		0.000000, 0.007843,
+		0.121569, 0.192157,
+		0.247059, 0.372549,
+		0.372549, 0.529412,
+		0.498039, 0.666667,
+		0.623529, 0.784314,
+		0.749020, 0.874510,
+		0.874510, 0.945098,
+		1.000000, 0.996078,
+	};
+	double green_pts[] = {
+		0.000000, 0.007843,
+		0.121569, 0.176471,
+		0.247059, 0.345098,
+		0.372549, 0.498039,
+		0.498039, 0.635294,
+		0.623529, 0.749020,
+		0.749020, 0.850980,
+		0.874510, 0.933333,
+		1.000000, 0.996078,
+	};
+	double blue_pts[] = {
+		0.000000, 0.007843,
+		0.121569, 0.164706,
+		0.247059, 0.329412,
+		0.372549, 0.482353,
+		0.498039, 0.611765,
+		0.623529, 0.733333,
+		0.749020, 0.835294,
+		0.874510, 0.921569,
+		1.000000, 0.996078,
+	};
 
-//	CWnd::OnRButtonUp(nFlags, point);
+	m_pCurveConfig->CreateSpline(CURVE_CHANNEL_R, 9, red_pts);
+	m_pCurveConfig->CreateSpline(CURVE_CHANNEL_B, 9, blue_pts);
+	m_pCurveConfig->CreateSpline(CURVE_CHANNEL_G, 9, green_pts);
+
+	SetSelectChannel(CURVE_CHANNEL_G);
+	NotifyOwner(UM_CURVE_CHANGE);
+	SetSelectChannel(CURVE_CHANNEL_B);
+	NotifyOwner(UM_CURVE_CHANGE);
+	SetSelectChannel(CURVE_CHANNEL_R);
+	NotifyOwner(UM_CURVE_CHANGE);
+
+	UpdateView();
+
+	CWnd::OnRButtonUp(nFlags, point);
 }
 
 void CCurveCtrl::OnSelChangeChannels(void)
 {
 	int index = m_ctrlChannels.GetCurSel();
 	m_pCurveConfig->SetSelectCurve(index);
-	//m_pCurveConfig->GetSelectCurve()->Calculate();
 
 	UpdateView();
 }
@@ -304,9 +288,10 @@ void CCurveCtrl::OnClickReset(void)
 {
 	Curve* curve = m_pCurveConfig->GetSelectCurve();
 	curve->Reset();
-//	curve->Calculate();
 
 	UpdateView();
+
+	NotifyOwner(UM_CURVE_CHANGE);
 }
 
 void CCurveCtrl::UpdateView(void)
@@ -411,11 +396,17 @@ void CCurveCtrl::OnDraw(CDC* pDC)
 	UpdateView();
 }
 
-void CCurveCtrl::NotifyOwner(void)
+void CCurveCtrl::NotifyOwner(UINT msg)
 {
 	CWnd* pOwner = GetOwner();
 	assert(pOwner);
-	pOwner->PostMessage(UM_CURVE_CHANGE, (WPARAM)m_pCurveConfig->GetSelectChannel(), (LPARAM)m_nSelectIndex);
+	pOwner->PostMessage(msg, (WPARAM)m_pCurveConfig->GetSelectChannel(), (LPARAM)m_nSelectIndex);
+}
+
+void CCurveCtrl::SetSelectChannel(const int channel)
+{
+	m_pCurveConfig->SetSelectCurve(channel);
+	m_ctrlChannels.SetCurSel(channel);
 }
 
 int CCurveCtrl::GetSelectChannel(void) const
@@ -467,3 +458,13 @@ void CCurveCtrl::ExportPoint(const int channel, double* points, const int count)
 	points[i * 2 + 0] = 1.0;
 	points[i * 2 + 1] = curve->GetSample(1.0);
 }
+
+void CCurveCtrl::Reset(void)
+{
+	m_pCurveConfig->Reset();
+	m_pCurveConfig->SetSelectCurve(0);
+	m_ctrlChannels.SetCurSel(0);
+
+	NotifyOwner(UM_CURVE_RESET);
+}
+

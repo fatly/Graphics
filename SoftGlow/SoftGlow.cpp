@@ -90,6 +90,7 @@ namespace e
 
 			for (int x = 0; x < width; x++)
 			{
+				//screen op
 				*(p2 + 0) = 255 - INT_MULT((255 - *(p0 + 0)), (255 - *p1), temp);
 				*(p2 + 1) = 255 - INT_MULT((255 - *(p0 + 1)), (255 - *p1), temp);
 				*(p2 + 2) = 255 - INT_MULT((255 - *(p0 + 2)), (255 - *p1), temp);
@@ -140,6 +141,7 @@ namespace e
 
 			for (int x = 0; x < src->Width(); x++)
 			{
+				//screen op
 				*(p1 + 0) = 255 - INT_MULT((255 - *(p0 + 0)), (255 - *(p1 + 0)), temp);
 				*(p1 + 1) = 255 - INT_MULT((255 - *(p0 + 1)), (255 - *(p1 + 1)), temp);
 				*(p1 + 2) = 255 - INT_MULT((255 - *(p0 + 2)), (255 - *(p1 + 2)), temp);

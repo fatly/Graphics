@@ -226,12 +226,14 @@ void Curve::SetSample(int index, double value)
 
 void Curve::Reset(void)
 {
+	//reset samples
 	for (int i = 0; i < sampleCount; i++)
 	{
 		samples[i] = (double)i / (double)(sampleCount - 1);
 		tables[i] = (byte)ROUND(samples[i] * 255);
 	}
 
+	//reset points
 	SetPoint(0, 0.0, 0.0);
 
 	for (int i = 1; i < pointCount - 1; i++)

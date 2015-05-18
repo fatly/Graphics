@@ -30,11 +30,12 @@ END_MESSAGE_MAP()
 CCurveDoc::CCurveDoc()
 {
 	// TODO:  在此添加一次性构造代码
-
+	m_pBitmap = 0;
 }
 
 CCurveDoc::~CCurveDoc()
 {
+	SAFE_DELETE(m_pBitmap);
 }
 
 BOOL CCurveDoc::OnNewDocument()
@@ -135,3 +136,12 @@ void CCurveDoc::Dump(CDumpContext& dc) const
 
 
 // CCurveDoc 命令
+BOOL CCurveDoc::OpenFile(const CString & fileName)
+{
+	USES_CONVERSION;
+	const char* path = W2A(fileName);
+	Bitmap* bitmap = new Bitmap(path);
+	if (bitmap == NULL) return FALSE;
+	SetBitmap(bitmap);
+	return TRUE;
+}

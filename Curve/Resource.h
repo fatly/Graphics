@@ -97,4 +97,6 @@
 #endif
 
 //user message
-#define UM_CURVE_CHANGE				(WM_USER + 1)
+#define UM_CURVE_INIT				(WM_USER + 1)
+#define UM_CURVE_CHANGE				(WM_USER + 2)
+#define UM_CURVE_RESET				(WM_USER + 3)

@@ -17,6 +17,17 @@
 #endif
 
 
+inline BOOL DrawBitmap(CDC* pDC, int x, int y, int w, int h, CBitmap* pBitmap, int xSrc, int ySrc)
+{
+	ASSERT(pDC != NULL && pBitmap != NULL);
+
+	CDC dc;
+	dc.CreateCompatibleDC(NULL);
+	dc.SelectObject(pBitmap);
+
+	return pDC->BitBlt(x, y, w, h, &dc, xSrc, ySrc, SRCCOPY);
+}
+
 // CCurveView
 
 IMPLEMENT_DYNCREATE(CCurveView, CView)
@@ -27,6 +38,7 @@ BEGIN_MESSAGE_MAP(CCurveView, CView)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CCurveView::OnFilePrintPreview)
 	ON_MESSAGE(UM_CURVE_CHANGE, &CCurveView::OnCurveChange)
+	ON_MESSAGE(UM_CURVE_RESET, &CCurveView::OnCurveReset)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
 	ON_WM_CREATE()
@@ -40,11 +52,30 @@ END_MESSAGE_MAP()
 CCurveView::CCurveView()
 {
 	// TODO:  在此处添加构造代码
+	m_pSrcBitmap = new CBitmap;
+	m_pDstBitmap = new CBitmap;
+	m_bLoadBitmap = FALSE;
 
+	for (int i = 0; i < 5; i++)
+	{
+		m_pCurveSamples[i] = new byte[256];
+
+		for (int j = 0; j < 256; j++)
+		{
+			m_pCurveSamples[i][j] = j;
+		}
+	}
 }
 
 CCurveView::~CCurveView()
 {
+	SAFE_DELETE(m_pSrcBitmap);
+	SAFE_DELETE(m_pDstBitmap);
+
+	for (int i = 0; i < 5; i++)
+	{
+		SAFE_DELETE(m_pCurveSamples[i]);
+	}
 }
 
 BOOL CCurveView::PreCreateWindow(CREATESTRUCT& cs)
@@ -176,6 +207,8 @@ int CCurveView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
+	m_ctrlCurves.SetOwner(this);
+
 	CRect rect(x0, y0, x1, y1);
 	AdjustWindowRect(&rect, dwStyle, FALSE);
 	m_ctrlCurves.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_SHOWWINDOW);
@@ -203,11 +236,32 @@ void CCurveView::OnSize(UINT nType, int cx, int cy)
 
 LRESULT CCurveView::OnCurveChange(WPARAM wParam, LPARAM lParam)
 {
+	int channel = (int)wParam;
+	m_ctrlCurves.GetSample(channel, m_pCurveSamples[channel], nullptr);
+
+	UpdateBitmap();
+
+	UpdateView();
+
+	return 0;
+}
+
+LRESULT CCurveView::OnCurveReset(WPARAM wParam, LPARAM lParam)
+{
+	int channel = (int)wParam;
+	m_ctrlCurves.GetSample(channel, m_pCurveSamples[channel], nullptr);
+
+	UpdateBitmap();
+
+	UpdateView();
+
 	return 0;
 }
 
 void CCurveView::UpdateView(void)
 {
+	if (!m_bLoadBitmap) return;
+
 	CRect rect;
 	GetClientRect(&rect);
 
@@ -220,29 +274,17 @@ void CCurveView::UpdateView(void)
 	CBrush brush(RGB(255, 255, 255));
 	dcMem.FillRect(&rect, &brush);
 
+	BITMAP bm;
+	m_pSrcBitmap->GetBitmap(&bm);
+
+	int x = 0, y = 0, w = bm.bmWidth, h = bm.bmHeight;
+	DrawBitmap(&dcMem, x, y, w, h, m_pSrcBitmap, 0, 0);
+	x += w;
+	DrawBitmap(&dcMem, x, y, w, h, m_pDstBitmap, 0, 0);
+
 	CClientDC dc(this);
 	dc.BitBlt(0, 0, rect.Width(), rect.Height(), &dcMem, 0, 0, SRCCOPY);
 }
-
-
-void CCurveView::OnFileOpen()
-{
-	// TODO:  在此添加命令处理程序代码
-	int count = 9;
-	double* points = new double[count * 2];
-	int channel = m_ctrlCurves.GetSelectChannel();
-	m_ctrlCurves.ExportPoint(channel, points, count);
-
-	TCHAR text[256] = { 0 };
-	for (int i = 0; i < count; i++)
-	{
-		_stprintf_s(text, TEXT("%lf, %lf,\n"), points[i * 2 + 0], points[i * 2 + 1]);
-		OutputDebugString(text);
-	}
-
-	delete[] points;
-}
-
 
 void CCurveView::OnFileNew()
 {
@@ -278,4 +320,94 @@ void CCurveView::OnFileNew()
 		m_ctrlCurves.SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_SHOWWINDOW);
 		m_ctrlCurves.OnDraw(NULL);
 	}
+
+	//m_ctrlCurves.Reset();
+	m_ctrlCurves.OnDraw(NULL);
+
+	UpdateBitmap();
+
+	UpdateView();
 }
+
+void CCurveView::OnFileOpen()
+{
+	// TODO:  在此添加命令处理程序代码
+	CFileDialog dlg(TRUE, TEXT("*.BMP"), TEXT("*.BMP"));
+	if (dlg.DoModal() == IDOK)
+	{
+		CCurveDoc* pDoc = GetDocument();
+
+		if (!pDoc->OpenFile(dlg.GetPathName())) return;
+
+		AttachBitmap(m_pSrcBitmap, pDoc->GetBitmap());
+		m_bLoadBitmap = TRUE;
+
+		UpdateBitmap();
+
+		UpdateView();
+	}
+}
+
+inline void CCurveView::AttachBitmap(CBitmap* pBitmap, const Bitmap* bitmap)
+{
+	BITMAPINFOHEADER bi;
+	bi.biSize = sizeof(bi);
+	bi.biWidth = bitmap->biWidth;
+	bi.biHeight = bitmap->biHeight;
+	bi.biBitCount = bitmap->biBitCount;
+	bi.biPlanes = bitmap->biPlanes;
+	bi.biSizeImage = bitmap->biSizeImage;
+	bi.biCompression = bitmap->biCompression;
+	bi.biClrImportant = bitmap->biClrImportant;
+	bi.biClrUsed = bitmap->biClrUsed;
+	bi.biHeight = -bi.biHeight;
+
+	HBITMAP hBitmap = CreateDIBitmap(GetDC()->GetSafeHdc()
+		, &bi
+		, CBM_INIT
+		, (void*)bitmap->bits
+		, (BITMAPINFO*)&bi
+		, DIB_RGB_COLORS);
+
+	pBitmap->DeleteObject();
+	pBitmap->Attach(hBitmap);
+}
+
+void CCurveView::UpdateBitmap(void)
+{
+	if (!m_bLoadBitmap) return;
+
+	CCurveDoc* pDoc = GetDocument();
+	Bitmap* pBitmap = pDoc->GetBitmap()->Clone();
+	assert(pBitmap != NULL);
+
+	int bytesPerPixel = pBitmap->PixelBytes();
+
+	for (int y = 0; y < pBitmap->Height(); y++)
+	{
+		uint8* p = pBitmap->Get(0, y);
+		for (int x = 0; x < pBitmap->Width(); x++)
+		{
+			//set color channel
+			*(p + 0) = m_pCurveSamples[0][*(p + 0)];
+			*(p + 1) = m_pCurveSamples[0][*(p + 1)];
+			*(p + 2) = m_pCurveSamples[0][*(p + 2)];
+			//set each channel
+			*(p + 0) = m_pCurveSamples[3][*(p + 0)];
+			*(p + 1) = m_pCurveSamples[2][*(p + 1)];
+			*(p + 2) = m_pCurveSamples[1][*(p + 2)];
+			//if has alpha channel
+			if (bytesPerPixel > 3)
+			{
+				*(p + 3) = m_pCurveSamples[4][*(p + 3)];
+			}
+
+			p += bytesPerPixel;
+		}
+	}
+
+	AttachBitmap(m_pDstBitmap, pBitmap);
+
+	SAFE_DELETE(pBitmap);
+}
+
