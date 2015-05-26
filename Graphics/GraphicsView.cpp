@@ -1,10 +1,10 @@
-
-// GraphicsView.cpp : CGraphicsView ÀàµÄÊµÏÖ
+ï»¿
+// GraphicsView.cpp : CGraphicsView ç±»çš„å®ç°
 //
 
 #include "stdafx.h"
-// SHARED_HANDLERS ¿ÉÒÔÔÚÊµÏÖÔ¤ÀÀ¡¢ËõÂÔÍ¼ºÍËÑË÷É¸Ñ¡Æ÷¾ä±úµÄ
-// ATL ÏîÄ¿ÖĞ½øĞĞ¶¨Òå£¬²¢ÔÊĞíÓë¸ÃÏîÄ¿¹²ÏíÎÄµµ´úÂë¡£
+// SHARED_HANDLERS å¯ä»¥åœ¨å®ç°é¢„è§ˆã€ç¼©ç•¥å›¾å’Œæœç´¢ç­›é€‰å™¨å¥æŸ„çš„
+// ATL é¡¹ç›®ä¸­è¿›è¡Œå®šä¹‰ï¼Œå¹¶å…è®¸ä¸è¯¥é¡¹ç›®å…±äº«æ–‡æ¡£ä»£ç ã€‚
 #ifndef SHARED_HANDLERS
 #include "Graphics.h"
 #endif
@@ -22,7 +22,7 @@ float sigma = 0.5f;
 IMPLEMENT_DYNCREATE(CGraphicsView, CView)
 
 BEGIN_MESSAGE_MAP(CGraphicsView, CView)
-	// ±ê×¼´òÓ¡ÃüÁî
+	// æ ‡å‡†æ‰“å°å‘½ä»¤
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CGraphicsView::OnFilePrintPreview)
@@ -37,11 +37,11 @@ BEGIN_MESSAGE_MAP(CGraphicsView, CView)
 	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
-// CGraphicsView ¹¹Ôì/Îö¹¹
+// CGraphicsView æ„é€ /ææ„
 
 CGraphicsView::CGraphicsView()
 {
-	// TODO:  ÔÚ´Ë´¦Ìí¼Ó¹¹Ôì´úÂë
+	// TODO:  åœ¨æ­¤å¤„æ·»åŠ æ„é€ ä»£ç 
 	m_pSrcBitmap = NULL;
 	m_pDstBitmap = NULL;
 	m_bMouseDown = FALSE;
@@ -58,13 +58,80 @@ CGraphicsView::~CGraphicsView()
 
 BOOL CGraphicsView::PreCreateWindow(CREATESTRUCT& cs)
 {
-	// TODO:  ÔÚ´Ë´¦Í¨¹ıĞŞ¸Ä
-	//  CREATESTRUCT cs À´ĞŞ¸Ä´°¿ÚÀà»òÑùÊ½
+	// TODO:  åœ¨æ­¤å¤„é€šè¿‡ä¿®æ”¹
+	//  CREATESTRUCT cs æ¥ä¿®æ”¹çª—å£ç±»æˆ–æ ·å¼
 
 	return CView::PreCreateWindow(cs);
 }
 
-// CGraphicsView »æÖÆ
+void sort(float y_re[], float y_im[], int N)
+{
+	/*Â ç”¨é›·å¾·ç®—æ³•å¯¹è¾“å…¥ä¿¡å·åºåˆ—è¿›è¡Œå€’åºé‡æ’Â */
+	int j = 0, k = 0;
+	for (int i = 0; i < N; i++)
+	{
+		if (i < j)
+		{
+			swap(y_re[i], y_re[j]);
+			swap(y_im[i], y_im[j]);
+		}
+
+		k = N / 2;
+
+		while ((k <= j) && (k > 0))
+		{
+			j = j - k;
+			k = k / 2;
+		}
+
+		j = j + k;
+	}
+}
+
+void fft(float y_re[], float y_im[], int N)
+{
+	const float pi = 3.141592654f;
+	/* è®¡ç®—è¶å½¢è¿ç®—çš„çº§æ•°log2(N) */
+	int f = N, m = 0;
+	for (m = 1; (f = f / 2) != 1; m++);
+	/* FFT */
+	int a = 0, b = 0;
+	float v_re, v_im, w_re, w_im, t_re, t_im;
+	for (int n = 1; n <= m; n++)
+	{
+		a = 1;
+		for (int i = 0; i < n; i++)
+		{
+			a = a * 2;
+		}
+		b = a / 2;
+		v_re = 1.0f;
+		v_im = 0.0f;
+		w_re = cos(pi / b);
+		w_im = -sin(pi / b);
+
+		for (int j = 0; j < b; j++)
+		{
+			for (int i = j; i < N; i += a)
+			{
+				int c = i + b;
+				t_re = y_re[c] * v_re - y_im[c] * v_im;
+				t_im = y_re[c] * v_im + y_im[c] * v_re;
+				y_re[c] = y_re[i] - t_re;
+				y_im[c] = y_im[i] - t_im;
+				y_re[i] += t_re;
+				y_im[i] += t_im;
+			}
+
+			t_re = v_re * w_re - v_im * w_im;
+			t_im = v_re * w_im + v_im * w_re;
+			v_re = t_re;
+			v_im = t_im;
+		}
+	}
+}
+
+// CGraphicsView ç»˜åˆ¶
 
 void CGraphicsView::OnDraw(CDC* /*pDC*/)
 {
@@ -73,7 +140,7 @@ void CGraphicsView::OnDraw(CDC* /*pDC*/)
 	if (!pDoc)
 		return;
 
-	// TODO:  ÔÚ´Ë´¦Îª±¾»úÊı¾İÌí¼Ó»æÖÆ´úÂë
+	// TODO:  åœ¨æ­¤å¤„ä¸ºæœ¬æœºæ•°æ®æ·»åŠ ç»˜åˆ¶ä»£ç 
 	CRect rc;
 	GetClientRect(&rc);
 
@@ -117,12 +184,49 @@ void CGraphicsView::OnDraw(CDC* /*pDC*/)
 		DrawString(&dcMem, 100, m_rcClient.bottom - 30, m_strText);
 	}
 
+	int N = 64;
+	float pi = 3.141592654f;
+	float x_re[64], x_im[64], y_re[64], y_im[64];
+
+	for (int i = 0; i < N; i++)
+	{
+		x_re[i] = 4 * cos(-10 * pi * i / N) + 2 * cos(-16 * pi * i / N);
+		x_im[i] = 0;
+	}
+
+	for (int i = 0; i < N; i++)
+	{
+		y_re[i] = x_re[i];
+		y_im[i] = x_im[i];
+	}
+
+	sort(y_re, y_im, N);
+
+	fft(y_re, y_im, N);
+
+	int scale = 1;
+	int x = 0, y = 500 - y_re[0] * scale;
+	CPen pen(PS_SOLID, 1, RGB(255, 0, 0));
+	dcMem.SelectObject(&pen);
+
+	dcMem.MoveTo(0, 500);
+	dcMem.LineTo(rc.right, 500);
+
+	dcMem.MoveTo(x, y);
+	for (int i = 1; i < N; i++)
+	{
+		x = i * 10;
+		y = 500 - y_re[i] * scale;
+
+		dcMem.LineTo(x, y);
+	}
+
   	CClientDC dc(this);
   	dc.BitBlt(0, 0, rc.Width(), rc.Height(), &dcMem, 0, 0, SRCCOPY);
 }
 
 
-// CGraphicsView ´òÓ¡
+// CGraphicsView æ‰“å°
 
 
 void CGraphicsView::OnFilePrintPreview()
@@ -134,18 +238,18 @@ void CGraphicsView::OnFilePrintPreview()
 
 BOOL CGraphicsView::OnPreparePrinting(CPrintInfo* pInfo)
 {
-	// Ä¬ÈÏ×¼±¸
+	// é»˜è®¤å‡†å¤‡
 	return DoPreparePrinting(pInfo);
 }
 
 void CGraphicsView::OnBeginPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
-	// TODO:  Ìí¼Ó¶îÍâµÄ´òÓ¡Ç°½øĞĞµÄ³õÊ¼»¯¹ı³Ì
+	// TODO:  æ·»åŠ é¢å¤–çš„æ‰“å°å‰è¿›è¡Œçš„åˆå§‹åŒ–è¿‡ç¨‹
 }
 
 void CGraphicsView::OnEndPrinting(CDC* /*pDC*/, CPrintInfo* /*pInfo*/)
 {
-	// TODO:  Ìí¼Ó´òÓ¡ºó½øĞĞµÄÇåÀí¹ı³Ì
+	// TODO:  æ·»åŠ æ‰“å°åè¿›è¡Œçš„æ¸…ç†è¿‡ç¨‹
 }
 
 void CGraphicsView::OnRButtonUp(UINT /* nFlags */, CPoint point)
@@ -162,7 +266,7 @@ void CGraphicsView::OnContextMenu(CWnd* /* pWnd */, CPoint point)
 }
 
 
-// CGraphicsView Õï¶Ï
+// CGraphicsView è¯Šæ–­
 
 #ifdef _DEBUG
 void CGraphicsView::AssertValid() const
@@ -175,14 +279,14 @@ void CGraphicsView::Dump(CDumpContext& dc) const
 	CView::Dump(dc);
 }
 
-CGraphicsDoc* CGraphicsView::GetDocument() const // ·Çµ÷ÊÔ°æ±¾ÊÇÄÚÁªµÄ
+CGraphicsDoc* CGraphicsView::GetDocument() const // éè°ƒè¯•ç‰ˆæœ¬æ˜¯å†…è”çš„
 {
 	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CGraphicsDoc)));
 	return (CGraphicsDoc*)m_pDocument;
 }
 #endif //_DEBUG
 
-// ÊµÏÖ
+// å®ç°
 CBitmap* CGraphicsView::CreateBitmap(const Bitmap* pBitmap)
 {
 	ASSERT(pBitmap != NULL);
@@ -263,11 +367,11 @@ inline BOOL CGraphicsView::DrawString(CDC* pDC, int x, int y, const CString & st
 }
 
 
-// CGraphicsView ÏûÏ¢´¦Àí³ÌĞò
+// CGraphicsView æ¶ˆæ¯å¤„ç†ç¨‹åº
 
 void CGraphicsView::OnFileOpen()
 {
-	// TODO:  ÔÚ´ËÌí¼ÓÃüÁî´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤æ·»åŠ å‘½ä»¤å¤„ç†ç¨‹åºä»£ç 
 	CFileDialog dlg(TRUE, TEXT(".BMP"), TEXT("*.BMP"));
 
 	if (dlg.DoModal() == IDOK)
@@ -301,7 +405,7 @@ void CGraphicsView::OnFileOpen()
 
 void CGraphicsView::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO:  ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO:  åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	m_MousePoint[0] = point;
 	m_rcSelected.left = m_rcSelected.right = point.x;
 	m_rcSelected.top = m_rcSelected.bottom = point.y;
@@ -315,7 +419,7 @@ void CGraphicsView::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CGraphicsView::OnMouseMove(UINT nFlags, CPoint point)
 {
-	// TODO:  ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO:  åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if (m_bMouseDown)
 	{
 		CRect rect;
@@ -339,7 +443,7 @@ void CGraphicsView::OnMouseMove(UINT nFlags, CPoint point)
 
 void CGraphicsView::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO:  ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO:  åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	CRect rect;
 	GetClientRect(&rect);
 	point.x = clamp(point.x, rect.left, rect.right);
@@ -392,7 +496,7 @@ void CGraphicsView::OnSize(UINT nType, int cx, int cy)
 {
 	CView::OnSize(nType, cx, cy);
 
-	// TODO:  ÔÚ´Ë´¦Ìí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂë
+	// TODO:  åœ¨æ­¤å¤„æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç 
 	static CSize size(cx, cy);
 
 	if (cx != size.cx || cy != size.cy)
@@ -410,7 +514,7 @@ void CGraphicsView::OnSize(UINT nType, int cx, int cy)
 
 BOOL CGraphicsView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	// TODO:  ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO:  åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if (zDelta > 0)
 		sigma += 0.1f;
 	else
@@ -425,7 +529,7 @@ BOOL CGraphicsView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CGraphicsView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	// TODO:  ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO:  åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	if (nChar == 38)
 	{
 		sigma += 0.1f;

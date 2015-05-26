@@ -7,7 +7,7 @@
 #define INT_MULT(a,b,t)  ((t) = (a) * (b) + 0x80, ((((t) >> 8) + (t)) >> 8))
 
 
-inline int gimp_rgb_to_l_int(int red, int green, int blue)
+inline int rgb_to_l(int red, int green, int blue)
 {
 	int minValue, maxValue;
 
@@ -66,7 +66,7 @@ namespace e
 				uint8 g = *(p0 + 1);
 				uint8 r = *(p0 + 2);
 
-				*p1 = (uint8)gimp_rgb_to_l_int(r, g, b);
+				*p1 = (uint8)rgb_to_l(r, g, b);
 
 				*p1 = (uint8)CalcSharpAndBright(*p1, sharpness, brightness);
 
@@ -75,10 +75,11 @@ namespace e
 			}
 		}
 
-		Gaussion(tmp, radius);
+		Gaussion(tmp, (float)radius);
 
+#ifdef _DEBUG
 		tmp->Save("f:\\tmp0.bmp");
-
+#endif
 		Bitmap* dst = new Bitmap(src->Width(), src->Height(), src->biBitCount);
 		assert(dst);
 		int temp;
@@ -112,7 +113,7 @@ namespace e
 
 		Bitmap* dst = new Bitmap(src->Width(), src->Height(), src->biBitCount, 0, false);
 		assert(dst);
-
+		//calc sharpness and brightness
 		for (int y = 0; y < src->Height(); y++)
 		{
 			uint8* p0 = src->Get(0, y);
@@ -128,11 +129,12 @@ namespace e
 				p1 += dst->PixelBytes();
 			}
 		}
+		//gaussion filter
+		Gaussion(dst, (float)radius);
 
-		Gaussion(dst, radius);
-
+#ifdef _DEBUG
 		dst->Save("f:\\tmp0.bmp");
-
+#endif
 		int temp;
 		for (int y = 0; y < src->Height(); y++)
 		{
