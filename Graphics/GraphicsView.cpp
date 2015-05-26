@@ -381,10 +381,10 @@ void CGraphicsView::OnFileOpen()
 		pDoc->LoadBitmap(dlg.GetPathName());
 		Bitmap* pBitmap = pDoc->GetSrcBitmap();
 
-		Bitmap* pPPM = pBitmap->Clone();
-		pPPM->SwapChannel(0, 2);
-		Save2PPM(pPPM, "f:\\1.ppm");
-		delete pPPM;
+// 		Bitmap* pPPM = pBitmap->Clone();
+// 		pPPM->SwapChannel(0, 2);
+// 		Save2PPM(pPPM, "f:\\1.ppm");
+// 		delete pPPM;
 #if 0
 		m_pBitmap = new CBitmap;
 		m_pBitmap->CreateCompatibleBitmap(GetDC(), pBitmap->biWidth, pBitmap->biHeight);
